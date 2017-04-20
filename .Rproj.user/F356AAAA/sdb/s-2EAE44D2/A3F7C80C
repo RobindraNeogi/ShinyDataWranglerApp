@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "# This is the user-interface definition of a Shiny web application.\n# You can find out more about building applications with Shiny here:\n#\n# http://www.rstudio.com/shiny/\n#\n\nlibrary(shiny)\n\nshinyUI(pageWithSidebar(\n  \n  # Application title\n  headerPanel(\"Menu Test\"),\n  \n  # Sidebar with a slider input for number of observations\n  sidebarPanel(\n    uiOutput(\"control1\"),\n    \n    uiOutput(\"control2\"),\n    uiOutput(\"control3\"),\n    uiOutput(\"control4\"),\n    #uiOutput(\"control5\"),\n    \n    \n    actionButton(\"Merge\", \"Create aggregate\"),\n    HTML(\"<br><br>\"),\n    textInput(\"text\",\"Enter name of new aggregate\",value = \"Aggregate name\"),\n    HTML(\"<br>\"),\n    uiOutput(\"xcol\"),\n    selectInput(\"operator\", \"operator:\",\n                c(\"Divide by\",\"Multiply\",\"Add\",\"Subtract\")),\n    uiOutput(\"ycol\"),\n    \n    textInput(\"text2\",\"Enter name of new metric\",value = \"Metric Name\"),\n    actionButton(\"button\", \"Create metric\"),\n    HTML(\"<br><br>\"),\n    # uiOutput(\"Delete\"),\n    actionButton(\"DeleteButton\", \"Delete metric\")\n  ),\n  \n  # Show a plot of the generated distribution\n  mainPanel(\n    \n    # tableOutput(\"ImportedDataFiltered\"),\n    HTML(\"<br><br>\"),\n    DT::dataTableOutput('ImportedDataFiltered2'),\n    DT::dataTableOutput('ImportedDataFiltered'),\n    downloadButton('DownloadFilteredData', 'Download'),\n    HTML(\"<br><br>\"),\n    DT::dataTableOutput(\"SubsetData\"),\n    HTML(\"<br><br>\"),\n    DT::dataTableOutput(\"MergedData\"),\n    downloadButton('testdownload', 'Download')\n  )\n  \n  \n))\n\n",
+    "created" : 1492704696792.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "526279978",
+    "id" : "A3F7C80C",
+    "lastKnownWriteTime" : 1492690961,
+    "last_content_update" : 1492690961,
+    "path" : "~/Documents/ShinyApp/ui.R",
+    "project_path" : "ui.R",
+    "properties" : {
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

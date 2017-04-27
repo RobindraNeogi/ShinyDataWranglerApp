@@ -9,45 +9,58 @@ library(shiny)
 shinyUI(pageWithSidebar(
   
   # Application title
-  headerPanel("Menu Test"),
+  headerPanel("WGA Tool"),
   
-  # Sidebar with a slider input for number of observations
+  # 4 filter selections
   sidebarPanel(
     uiOutput("control1"),
-    
     uiOutput("control2"),
     uiOutput("control3"),
     uiOutput("control4"),
     #uiOutput("control5"),
     
-    
+   # Merge will add subset aggregat to contextual data 
     actionButton("Merge", "Create aggregate"),
     HTML("<br><br>"),
+   # Text input fot name of aggregate
     textInput("text","Enter name of new aggregate",value = "Aggregate name"),
     HTML("<br>"),
+   # Select variable for use in calc
     uiOutput("xcol"),
+   # Select operator for use in calc
     selectInput("operator", "operator:",
                 c("Divide by","Multiply","Add","Subtract")),
-    uiOutput("ycol"),
     
+   # Select 2nd variable  for calc
+   uiOutput("ycol"),
+    # Name calc variable
     textInput("text2","Enter name of new metric",value = "Metric Name"),
+   # Run calc
     actionButton("button", "Create metric"),
     HTML("<br><br>"),
     # uiOutput("Delete"),
+   #  Delete last variable
     actionButton("DeleteButton", "Delete metric")
   ),
   
-  # Show a plot of the generated distribution
+
   mainPanel(
     
     # tableOutput("ImportedDataFiltered"),
     HTML("<br><br>"),
-    DT::dataTableOutput('ImportedDataFiltered2'),
-    DT::dataTableOutput('ImportedDataFiltered'),
+   # ignore for now DT::dataTableOutput('ImportedDataFiltered2'),
+    
+   # Table shows filtered import data
+   DT::dataTableOutput('ImportedDataFiltered'),
     downloadButton('DownloadFilteredData', 'Download'),
     HTML("<br><br>"),
+   
+   # table shows subset aggregate data
+   
     DT::dataTableOutput("SubsetData"),
     HTML("<br><br>"),
+   
+   # Table shows final output merged data, aggegates and calculations
     DT::dataTableOutput("MergedData"),
     downloadButton('testdownload', 'Download')
   )

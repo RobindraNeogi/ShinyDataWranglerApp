@@ -1,55 +1,58 @@
-#test new commit test test 
 library(shiny)
 library(shinydashboard)
-## create dummy dataframe
 
-#ImportedData <- Dummydata<-data.frame(ID = c("LA1","LA2","LA3","LA1","LA2","LA3","LA1","LA2","LA3"),
-#                          Level2 = c("A","B","C","A","B","C","A","B","C"),
-#                        Level3 = c("AA","BA","CA","BA","BB","BC","CA","CB","CA"),
-#                         Level4 = c("AAA","BAB","CAC","ABA","BBB","CBC","ACA","BCB","CCC"),
-#                       Value = c(1,2,3,4,5,6,7,8,9))
 
-#ImportedData <-read.csv("C:\\Users\\neog968\\Desktop\\wgadata.csv",header=TRUE)
+# this is the location of the main data file on my windows machine
+# ImportedData <-read.csv("C:\\Users\\neog968\\Desktop\\wgadata.csv",header=TRUE)
+
+
+# this is the location of my main data file
 ImportedData <-read.csv("/Users/datascience4/Documents/datatool/wgadata.csv",header=TRUE)
+
+# this data are dimensions from the main data (probably should derive it from the one source later)
+# the aim is to filter this in parallel to the main data to have a record of the unique dimension IDs
+# that are used for aggregate measures created, as a record of what goes into a measure
+# it would also be good to use these IDs to filter the default choices of the main data filters
+# so a user could select a measure, and the default selection of each input filter will reflect the
+# selections made creating that variable. other options would still be available to select as this 
+# is defined by the cascading filter logic. (yet to fully implement)
+
 Definitions <-read.csv("/Users/datascience4/Documents/datatool/wgadimensions.csv",header=TRUE)
 
 
+# related to above this is because when I merge based on ID the common ID field is not duplicated. 
+# I want a list of all possible dimension IDs and to merge it with the filtered list of IDs
+# This is so that when merged on ID ID2 will not disapear (not yet implemented)
 
+Definitions$ID2<-Definitions$ID
 
-## ContextualData is the data I want to join the aggregated subsets too. in the final one it would
-## have population, indicies of deprivation etc.
+# 'Contextual data' is the preloaded data that will include contextual data such as population, deprivation etc
+# it also provides the template for the output data set. Aggregates based on filter selections will be merged
+# into a table with the contextual data based on code (made up of LA Code and Year)
 
-#ContextualData <- data.frame(ID = c("LA1","LA2","LA3"),
-#   Population = c(1,2,3),
-# deprivation=c(4,5,6))
-
-# ContextualData <-read.csv("C:\\Users\\neog968\\Desktop\\contextualdata.csv",header=TRUE)
+# Ignore, Windows location, ContextualData <-read.csv("C:\\Users\\neog968\\Desktop\\contextualdata.csv",header=TRUE)
 ContextualData <-read.csv("/Users/datascience4/Documents/datatool/contextualdata.csv",header=TRUE)
 
 
+# Main Server:
+
 shinyServer(function(input, output, session) {
   
-  ## Outputs filtered import data filtered by 4 menu selections
-  #output$ImportedDataFiltered <- renderTable({
-  # ImportedData<-ImportedData[ImportedData$Level1 %in% input$menu1,]
-  #ImportedData<-ImportedData[ImportedData$Level2 %in% input$menu2,]
-  #ImportedData<-ImportedData[ImportedData$Level3 %in% input$menu3,]
-  #ImportedData<-ImportedData[ImportedData$Level4 %in% input$menu4,]
-  #})
-  
+  # Ignore for now this is workin progress on filtering dimensions definitions
   
   #display definitions table
-  output$ImportedDataFiltered2 <- DT::renderDataTable(
-    DT::datatable(Mergeddef$df, options = list(searching = FALSE),
-                  rownames= FALSE))
+  #output$ImportedDataFiltered2 <- DT::renderDataTable(
+  #  DT::datatable(Mergeddef$df, options = list(searching = FALSE),
+   #               rownames= FALSE))
   
   
-  #display imported data table
+  #This displays the main imported data filtered by input filters
+  
   output$ImportedDataFiltered <- DT::renderDataTable(
     DT::datatable(FilteredImportData(), options = list(searching = FALSE),
                   rownames= FALSE))
   
-  
+  # This is the download handler for the filtered imported data, currently doesnt create filename correctly
   output$DownloadFilteredData <- downloadHandler(
     filename = function() {
       paste("data-", Sys.Date(), ".csv", sep="")
@@ -59,17 +62,18 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  ##  Imported data filtered by 4 menus (similar to above but wanted to reuse filtered data)
+  # This filters the main imported data by the four input filters
   
   FilteredImportData<-reactive({FilteredImportData <-ImportedData[ImportedData$Level1 %in% input$menu1,]
   ImportedData<-ImportedData[ImportedData$Level2 %in% input$menu2,]
   ImportedData<-ImportedData[ImportedData$Level3 %in% input$menu3,]
   ImportedData<-ImportedData[ImportedData$Level4 %in% input$menu4,]
-  # ImportedData<-ImportedData[ImportedData$Level5 %in% input$menu5,]
   })
   
-  ## SubsetData This is aggregating the FilteredImportData, grouping by ID (in this case LA but in
-  ## final will be the LA/Year ID). Req input menus to get rid of temporary error message on launch
+  # This aggregates the imported data value filed based on filter selection down to 'code' level
+  # (this a a unique code for an LA in a particular year). 
+  # As the input filters are themselves rendered outputs an error message will
+  # appear unless these 'req' conditions are in place
   
   SubsetData <-
     
@@ -78,39 +82,39 @@ shinyServer(function(input, output, session) {
       req(input$menu2)
       req(input$menu3)
       req(input$menu4)
-      #req(input$menu5)
+      
       
       aggregate(Value ~ Code, FilteredImportData(), sum)
     })
   
   
-  
-  SubsetDataDefinition <-
+# Ignore this for now, it is for the dimension definitions part I am working on
+ # SubsetDataDefinition <-
     
-    reactive({
-      req(input$menu1)
-      req(input$menu2)
-      req(input$menu3)
-      req(input$menu4)
-      #req(input$menu5)
+ # reactive({
+  #    req(input$menu1)
+  #    req(input$menu2)
+  #    req(input$menu4)
+  #    req(input$menu3)
+  #    #req(input$menu5)
       
-      unique(FilteredImportData()['ID'])
-    })
+   #   unique(FilteredImportData()['ID'])
+  #  })
   
-
-  
-  
-  ## This inputs aggreagte variable name from text input
+  ## This takes the name inputed in the text input to be used later as an aggregate name
   namerev<-reactive({
     as.character(paste(input$text))
   })
   
-  ## This replaces the column label 'Value' with the inputted name
-  SubsetDataDefinition2<-reactive({
-    d <- SubsetDataDefinition()
-    colnames(d)[colnames(d)=='ID'] <- namerev()
-    d
-  })
+  
+  # ignore for now, for dimension definitions
+  #SubsetDataDefinition2<-reactive({
+    #d <- SubsetDataDefinition()
+    #colnames(d)[colnames(d)=='ID'] <- namerev()
+    #d
+  #})
+  
+  
   
   ## This replaces the column label 'Value' with the inputted name
   SubsetData2<-reactive({
@@ -120,21 +124,19 @@ shinyServer(function(input, output, session) {
   })
   
   
-  ## This table displays the SubsetData
+  ## This table displays the SubsetData (aggregates based on filter selection)
   
   output$SubsetData <- DT::renderDataTable(
     DT::datatable(SubsetData(), options = list(searching = FALSE),
                   rownames= FALSE))
   
   
-  ## When 'create aggregate' button clicked SubsetData is merged with ContextualData.
-  ## Each click adds new column
-  ## when 'create ratio' button is clicked a calculated column is created using the two selected columns and operator
-  
+  # Creates output dataset of contextual data with derived aggregates and ratios
   MergedContextualDataWithSubset <- reactiveValues()
   MergedContextualDataWithSubset$df<-ContextualData
   
-  
+  # merges subsetdata aggegate with the contextual dataframe when 'Merge' is clicked.
+  # A new column is created for each click
   observe({
     if(input$Merge > 0) {
       isolate(
@@ -144,6 +146,8 @@ shinyServer(function(input, output, session) {
       )
     }
   })
+  
+  # If 'divide' selected in operator input one selected variable is divided by another selected variable
   observe({
     
     if(input$button > 0) {
@@ -157,6 +161,7 @@ shinyServer(function(input, output, session) {
         
       })
       
+      # If 'multiply' selected in operator input one selected variable is divided by another selected variable  
       isolate(if(input$operator=="Multiply") {
         
         newvar <- isolate((MergedContextualDataWithSubset$df[[input$xcol]] * MergedContextualDataWithSubset$df[[input$ycol]]))
@@ -165,6 +170,8 @@ shinyServer(function(input, output, session) {
         
         
       })
+      
+      # If 'Add' selected in operator input one selected variable is divided by another selected variable
       
       isolate(if(input$operator=="Add") {
         
@@ -175,36 +182,38 @@ shinyServer(function(input, output, session) {
         
       })
       
+      # If 'Subtract' selected in operator input one selected variable is divided by another selected variable
+      
       isolate(if(input$operator=="Subtract") {
         
         newvar <- isolate((MergedContextualDataWithSubset$df[[input$xcol]] - MergedContextualDataWithSubset$df[[input$ycol]]))
         isolate(MergedContextualDataWithSubset$df <- cbind(MergedContextualDataWithSubset$df, newvar))
         isolate(colnames(MergedContextualDataWithSubset$df)[colnames(MergedContextualDataWithSubset$df)=='newvar'] <- as.character(paste(input$text2)))
-        
       })
     }
+    
+    # Need another operator for option for turning negatives to absolute values
+    
     
   })
   
   
-  #merge filtered IDs to master ID file to be used later for definitions
-  
-  Mergeddef <- reactiveValues()
-  Mergeddef$df<-Definitions
-  
-  observe({
-    if(input$Merge > 0) {
-      isolate(
-        
-        Mergeddef$df <- merge
-        (Mergeddef$df,SubsetDataDefinition(),by="ID",all=TRUE,type="full")
-      )
-    }
-  })
+  #Ignore for now, merge filtered IDs to master ID file to be used later for definitions
+  #Mergeddef <- reactiveValues()
+  #Mergeddef$df<-Definitions
+  #observe({
+   # if(input$Merge > 0) {
+    #  isolate(
+      #  (Mergeddef$df,SubsetDataDefinition(),by="ID",all=TRUE,type="full")
+     #   Mergeddef$df <- merge
+  #    )
+   # }
+#  })
  
   
   
-  
+  # Deletes last column from output dataframe (based on counting number of columns with length)
+  # Would like to replace this with the ability to select variable to be delted
   observe({
     if(input$DeleteButton > 0) {
       isolate(MergedContextualDataWithSubset$df <- MergedContextualDataWithSubset$df[-c(length( names( MergedContextualDataWithSubset$df ) ))]
@@ -213,14 +222,12 @@ shinyServer(function(input, output, session) {
   })
   
   
-  ## Display MergedContextualDataWithSubset
+  # Display the final output data of contextual data, aggregates and calculations
   output$MergedData <- DT::renderDataTable(
     DT::datatable(MergedContextualDataWithSubset$df, options = list(searching = FALSE),
                   rownames= FALSE))
   
-  
-  #output$MergedData <- renderTable({MergedContextualDataWithSubset$df})
-  
+  # Download handler for final output data
   
   output$testdownload <- downloadHandler(
     filename = function() {
@@ -233,7 +240,7 @@ shinyServer(function(input, output, session) {
   
   ## UI Elements
   
-  ## Lists what has been entered in each menu
+  ## Lists what has been entered in each menu (used zz, and zzz because I adapted something that had just x,y,z)
   
   output$FilterChoices <- renderText({
     x <- input$menu1
@@ -243,7 +250,7 @@ shinyServer(function(input, output, session) {
     zzz<- input$menu5
     
     ## This is left over from the code I borrowed online. It makes the word 'select' appear
-    ## if filters are empty, but my version has all valid options selected by default
+    ## if filters are empty, but my version has all valid options selected by default so I have deactivated it
     
     # if (any(
     #  is.null(x),
@@ -256,13 +263,13 @@ shinyServer(function(input, output, session) {
     
   })
   
-  ## Makes 1st filter appear. options based on unique items in column
+  ## Makes 1st filter appear. options based on unique items in column, default selection is "Assets"
   
   output$control1 <- renderUI({
     selectInput("menu1", "Select Level 1", choices = unique(ImportedData$Level1),selected="Assets",multiple=TRUE)
   })
   
-  ## Makes 2st filter appear. options based on filtering first column and bringing back options from option 2 column
+  ## Makes 2st filter appear. choices based on Level2 options after Level1 filter applied
   
   output$control2 <- renderUI({
     x <- input$menu1
@@ -272,7 +279,7 @@ shinyServer(function(input, output, session) {
     selectInput("menu2", "Select Level 2", choices = sort(unique(choice2)),selected=choice2, multiple=TRUE)
   })
   
-  ## 3rd filter options based on 1st and 2nd filters results
+  ## Makes 3rd filter appear. choices based on previous filters
   
   output$control3 <- renderUI({
     x <- input$menu1
@@ -295,7 +302,7 @@ shinyServer(function(input, output, session) {
     selectInput("menu4", "Select Level 4", choices = sort(unique(choice4)),selected=choice4,multiple=TRUE)
   })
   
-  ## 5th filter based on first three
+  ## 5th filter based on first three, dont think I need to filter on this column and too many options so deactivated it
   
   #  output$control5 <- renderUI({
   #   x <- input$menu1
@@ -318,18 +325,23 @@ shinyServer(function(input, output, session) {
   #})
   
   
-  ## creates a variable select of MergedContextualDataWithSubset
+  # select a variable to use in calculation. set so first 4 are not selectable as these are factors not numerical
   output$xcol <- renderUI({
     
     choicexcol <- names(MergedContextualDataWithSubset$df)[-(1:4)]
     selectInput("xcol", "Metric part 1", choices = choicexcol)
   })
+  
+  # select 2nd variable to use in calculation. set so first 4 are not selectable as these are factors not numerical
+  
   output$ycol <- renderUI({
     
     choiceycol <- names(MergedContextualDataWithSubset$df)[-(1:4)]
     selectInput("ycol", "Metric part 2", choices = choiceycol)
     
   })
+  
+  # Delete button, select variable to delete, not yet implemented
   output$Delete <- renderUI({
     
     Delete <- names(MergedContextualDataWithSubset$df)[-1]
@@ -337,6 +349,8 @@ shinyServer(function(input, output, session) {
     
     
   })
-  output$default <- renderText({ input$xcol;input$ycol })
+  
+  
+
   
 })

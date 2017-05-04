@@ -13,6 +13,9 @@ shinyUI(pageWithSidebar(
   
   # 4 filter selections
   sidebarPanel(
+    # Select variable for use in calc
+    uiOutput("def"),
+    uiOutput("control1alt"),
     uiOutput("control1"),
     uiOutput("control2"),
     uiOutput("control3"),
@@ -48,7 +51,8 @@ shinyUI(pageWithSidebar(
     
     # tableOutput("ImportedDataFiltered"),
     HTML("<br><br>"),
-   # ignore for now DT::dataTableOutput('ImportedDataFiltered2'),
+   # ignore for now 
+   DT::dataTableOutput('ImportedDataFiltered2'),
     
    # Table shows filtered import data
    DT::dataTableOutput('ImportedDataFiltered'),

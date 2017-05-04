@@ -7,7 +7,22 @@ library(shinydashboard)
 
 
 # this is the location of my main data file
-ImportedData <-read.csv("/Users/datascience4/Documents/datatool/wgadata.csv",header=TRUE)
+#ImportedData <-read.csv("/Users/datascience4/Documents/datatool/wgadata.csv",header=TRUE)
+
+#create a data frame of unique rows of dimenstions from the same source as import data
+
+DefinitionsData<-ImportedData
+#Drop LA code/year column and value column
+DefinitionsData<-DefinitionsData[,-c(1,8)]
+#Remove duplicate rows so left with just the possible dimensions
+DefinitionsData <- unique(DefinitionsData)
+
+#Duplicate definitions data to be filtered in parallel to main import data
+DefinitionsData2<-DefinitionsData
+#Create duplicate ID field as ID will disappear in merge
+DefinitionsData2$ID2<-DefinitionsData2$ID
+
+
 
 # this data are dimensions from the main data (probably should derive it from the one source later)
 # the aim is to filter this in parallel to the main data to have a record of the unique dimension IDs
@@ -17,14 +32,14 @@ ImportedData <-read.csv("/Users/datascience4/Documents/datatool/wgadata.csv",hea
 # selections made creating that variable. other options would still be available to select as this 
 # is defined by the cascading filter logic. (yet to fully implement)
 
-Definitions <-read.csv("/Users/datascience4/Documents/datatool/wgadimensions.csv",header=TRUE)
+#Definitions <-read.csv("/Users/datascience4/Documents/datatool/wgadimensions.csv",header=TRUE)
 
 
 # related to above this is because when I merge based on ID the common ID field is not duplicated. 
 # I want a list of all possible dimension IDs and to merge it with the filtered list of IDs
 # This is so that when merged on ID ID2 will not disapear (not yet implemented)
 
-Definitions$ID2<-Definitions$ID
+#Definitions$ID2<-Definitions$ID
 
 # 'Contextual data' is the preloaded data that will include contextual data such as population, deprivation etc
 # it also provides the template for the output data set. Aggregates based on filter selections will be merged
@@ -48,6 +63,11 @@ shinyServer(function(input, output, session) {
   
   #This displays the main imported data filtered by input filters
   
+  output$ImportedDataFiltered2 <- DT::renderDataTable(
+    DT::datatable(MergedDefinitionWithFilteredDefinitions$df, options = list(searching = FALSE),
+                  rownames= FALSE))
+  
+  
   output$ImportedDataFiltered <- DT::renderDataTable(
     DT::datatable(FilteredImportData(), options = list(searching = FALSE),
                   rownames= FALSE))
@@ -69,6 +89,15 @@ shinyServer(function(input, output, session) {
   ImportedData<-ImportedData[ImportedData$Level3 %in% input$menu3,]
   ImportedData<-ImportedData[ImportedData$Level4 %in% input$menu4,]
   })
+  
+  # This filters the definitions data in parralel to main imported data by the four input filters
+  
+  FilteredDefinitionsData<-reactive({DefinitionsData2 <-DefinitionsData2[DefinitionsData2$Level1 %in% input$menu1,]
+  DefinitionsData2<-DefinitionsData2[DefinitionsData2$Level2 %in% input$menu2,]
+  DefinitionsData2<-DefinitionsData2[DefinitionsData2$Level3 %in% input$menu3,]
+  DefinitionsData2<-DefinitionsData2[DefinitionsData2$Level4 %in% input$menu4,]
+  })
+  
   
   # This aggregates the imported data value filed based on filter selection down to 'code' level
   # (this a a unique code for an LA in a particular year). 
@@ -123,6 +152,15 @@ shinyServer(function(input, output, session) {
     d
   })
   
+  # This replaced ID2 with the name of the created metric, to later be merged into the definitions file
+  
+  FilteredDefinitionsData2<-reactive({
+    d <- FilteredDefinitionsData()
+    colnames(d)[colnames(d)=='ID2'] <- namerev()
+    d
+  })
+  
+  
   
   ## This table displays the SubsetData (aggregates based on filter selection)
   
@@ -146,6 +184,25 @@ shinyServer(function(input, output, session) {
       )
     }
   })
+  
+  #This merges the filtered IDs into all the possible IDs, to give a definition file
+  
+  MergedDefinitionWithFilteredDefinitions <- reactiveValues()
+  MergedDefinitionWithFilteredDefinitions$df<-DefinitionsData
+  
+  observe({
+    if(input$Merge > 0) {
+      isolate(
+        
+        MergedDefinitionWithFilteredDefinitions$df <- merge
+        (MergedDefinitionWithFilteredDefinitions$df,FilteredDefinitionsData2()[6:7],by="ID",all=TRUE)
+      )
+    }
+  })
+  
+  
+  
+  
   
   # If 'divide' selected in operator input one selected variable is divided by another selected variable
   observe({
@@ -198,17 +255,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-  #Ignore for now, merge filtered IDs to master ID file to be used later for definitions
-  #Mergeddef <- reactiveValues()
-  #Mergeddef$df<-Definitions
-  #observe({
-   # if(input$Merge > 0) {
-    #  isolate(
-      #  (Mergeddef$df,SubsetDataDefinition(),by="ID",all=TRUE,type="full")
-     #   Mergeddef$df <- merge
-  #    )
-   # }
-#  })
+
  
   
   
@@ -263,20 +310,36 @@ shinyServer(function(input, output, session) {
     
   })
   
-  ## Makes 1st filter appear. options based on unique items in column, default selection is "Assets"
+  ## Makes 1st filter appear. options based on unique items in column, default selection is "Reserves"
+  
+  #output$control1 <- renderUI({
+  #  selectInput("menu1", "Select Level 1", choices = unique(ImportedData$Level1),selected="Reserves",multiple=TRUE)
+#  })
   
   output$control1 <- renderUI({
-    selectInput("menu1", "Select Level 1", choices = unique(ImportedData$Level1),selected="Assets",multiple=TRUE)
+  
+    X2<- MergedDefinitionWithFilteredDefinitions$df[[input$def]]
+    choicesAlt<-ImportedData[ImportedData$ID %in% X2,
+                             "Level1"]
+      
+      #unique(MergedDefinitionWithFilteredDefinitions$df[['Level1']])
+    
+    
+    selectInput("menu1", "Select Level 1", choices = unique(ImportedData$Level1),
+                selected= choicesAlt,multiple=TRUE)
   })
+  
   
   ## Makes 2st filter appear. choices based on Level2 options after Level1 filter applied
   
   output$control2 <- renderUI({
     x <- input$menu1
-    
+    X2<- MergedDefinitionWithFilteredDefinitions$df[[input$def]]
     choice2 <- ImportedData[ImportedData$Level1 %in% x,
                             "Level2"]
-    selectInput("menu2", "Select Level 2", choices = sort(unique(choice2)),selected=choice2, multiple=TRUE)
+    choicesAlt2<-ImportedData[ImportedData$ID %in% X2,
+                             "Level2"]
+    selectInput("menu2", "Select Level 2", choices = sort(unique(choice2)),selected=choicesAlt2, multiple=TRUE)
   })
   
   ## Makes 3rd filter appear. choices based on previous filters
@@ -284,10 +347,13 @@ shinyServer(function(input, output, session) {
   output$control3 <- renderUI({
     x <- input$menu1
     y <- input$menu2
+    X2<- MergedDefinitionWithFilteredDefinitions$df[[input$def]]
+    choicesAlt3<-ImportedData[ImportedData$ID %in% X2,
+                              "Level3"]
     choice3 <- ImportedData[ImportedData$Level1 %in% x & ImportedData$Level2 %in% y,
                             "Level3"]
     
-    selectInput("menu3", "Select Level 3", choices = sort(unique(choice3)),selected=choice3,multiple=TRUE)
+    selectInput("menu3", "Select Level 3", choices = sort(unique(choice3)),selected=choicesAlt3,multiple=TRUE)
   })
   
   ## 4th filter based on first three
@@ -296,10 +362,13 @@ shinyServer(function(input, output, session) {
     x <- input$menu1
     y <- input$menu2
     z <- input$menu3
+    X2<- MergedDefinitionWithFilteredDefinitions$df[[input$def]]
+    choicesAlt4<-ImportedData[ImportedData$ID %in% X2,
+                              "Level4"]
     choice4 <- ImportedData[ImportedData$Level1 %in% x & ImportedData$Level2 %in% y & ImportedData$Level3 %in% z,
                             "Level4"]
     
-    selectInput("menu4", "Select Level 4", choices = sort(unique(choice4)),selected=choice4,multiple=TRUE)
+    selectInput("menu4", "Select Level 4", choices = sort(unique(choice4)),selected=choicesAlt4,multiple=TRUE)
   })
   
   ## 5th filter based on first three, dont think I need to filter on this column and too many options so deactivated it
@@ -330,6 +399,13 @@ shinyServer(function(input, output, session) {
     
     choicexcol <- names(MergedContextualDataWithSubset$df)[-(1:4)]
     selectInput("xcol", "Metric part 1", choices = choicexcol)
+  })
+  
+  output$def <- renderUI({
+    
+    choicedef <- names(MergedDefinitionWithFilteredDefinitions$df)
+    
+    selectInput("def", "Template", choices = choicedef,selected="ID")
   })
   
   # select 2nd variable to use in calculation. set so first 4 are not selectable as these are factors not numerical

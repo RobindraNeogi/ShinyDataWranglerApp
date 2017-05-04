@@ -9,7 +9,7 @@ library(shiny)
 shinyUI(pageWithSidebar(
   
   # Application title
-  headerPanel("WGA Tool"),
+  headerPanel("Data Wrangling Tool"),
   
   # 4 filter selections
   sidebarPanel(

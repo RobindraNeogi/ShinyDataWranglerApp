@@ -17,10 +17,15 @@ DefinitionsData<-DefinitionsData[,-c(1,8)]
 #Remove duplicate rows so left with just the possible dimensions
 DefinitionsData <- unique(DefinitionsData)
 
+
+
 #Duplicate definitions data to be filtered in parallel to main import data
 DefinitionsData2<-DefinitionsData
 #Create duplicate ID field as ID will disappear in merge
 DefinitionsData2$ID2<-DefinitionsData2$ID
+
+
+DefinitionsData$All<-DefinitionsData$ID
 
 
 
@@ -403,7 +408,7 @@ shinyServer(function(input, output, session) {
   
   output$def <- renderUI({
     
-    choicedef <- names(MergedDefinitionWithFilteredDefinitions$df)
+    choicedef <- names(MergedDefinitionWithFilteredDefinitions$df)[-(1:6)]
     
     selectInput("def", "Template", choices = choicedef,selected="ID")
   })

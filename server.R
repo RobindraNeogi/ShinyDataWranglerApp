@@ -78,6 +78,11 @@ shinyServer(function(input, output, session) {
                   rownames= FALSE)
     )
   
+  
+  
+  
+  
+  
   # This is the download handler for the filtered imported data, currently doesnt create filename correctly
   output$DownloadFilteredData <- downloadHandler(
     filename = function() {
@@ -283,6 +288,11 @@ shinyServer(function(input, output, session) {
     DT::datatable(MergedContextualDataWithSubset$df, options = list(searching = FALSE),
                   rownames= FALSE))
   
+  # Display text for k tb
+  output$MergedData2 <- DT::renderDataTable(
+    DT::datatable(MergedContextualDataWithSubset2$df, options = list(searching = FALSE),
+                  rownames= FALSE))
+  
   # Download handler for final output data
   
   output$testdownload <- downloadHandler(
@@ -443,6 +453,81 @@ shinyServer(function(input, output, session) {
   })
   
   
+  
+  
+  
+  output$Kycol <- renderUI({
+    
+    choiceycol <- names(MergedContextualDataWithSubset$df)[-(1:4)]
+    selectInput("Kycol", "Metric part 2", choices = choiceycol)
+    
+  })
+  
+  output$Kxcol <- renderUI({
+    
+    choiceycol <- names(MergedContextualDataWithSubset$df)[-(1:4)]
+    selectInput("Kxcol", "Metric part 2", choices = choiceycol)
+    
+  })
+  
+  
+  # from shiny gallery k-means clustering need to adapt
+  
+  MergedContextualDataWithSubset2 <- MergedContextualDataWithSubset
+  
+  
+ # MergedContextualDataWithSubset2<-MergedContextualDataWithSubset
+  
+  
+  KselectedData<-DataforK<-ContextualData[,-c(1:4)]
+  
+  #KselectedData<-MergedContextualDataWithSubset[[-(1:4)]]
+  
+  
+  #KselectedData <- reactive({
+   # DataforK[, c(input$Kxcol, input$Kycol)]
+  #})
+  
+  clusters <- reactive({
+    kmeans(KselectedData, input$clusters)
+  })
+  
+  output$plot1 <- renderPlot({
+    palette(c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
+              "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999"))
+    
+    par(mar = c(5.1, 4.1, 0, 1))
+    plot(KselectedData,
+         col = clusters()$cluster,
+         pch = 20, cex = 3)
+    points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
+  })
+  
+  MergedContextualDataWithSubset2<-MergedContextualDataWithSubset
+
+  #newdata <- mtcars[order(mpg),] 
+  
+  # Fill in the spot we created for a plot
+  
+  output$region <- renderUI({
+    
+    choiceycol <- names(MergedContextualDataWithSubset2$df)[-(1:4)]
+    selectInput("region", "Metric part 2", choices = choiceycol)
+    
+  })
+  
+  
+  output$barchart <- renderPlot({
+    
+    # Render a barplot
+    barplot(MergedContextualDataWithSubset2$df[,input$region], 
+            main=input$region,
+            ylab="",
+            xlab="")
+  })
+  
+  data<-reactive({MergedContextualDataWithSubset2$df[,input$region]
+  })
   
   
 })

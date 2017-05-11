@@ -75,8 +75,7 @@ shinyServer(function(input, output, session) {
   
   output$ImportedDataFiltered <- DT::renderDataTable(
     DT::datatable(FilteredImportData(), options = list(searching = FALSE),
-                  rownames= FALSE)
-    )
+                  rownames= FALSE))
   
   # This is the download handler for the filtered imported data, currently doesnt create filename correctly
   output$DownloadFilteredData <- downloadHandler(
@@ -115,7 +114,6 @@ shinyServer(function(input, output, session) {
   SubsetData <-
     
     reactive({
-      req(input$def)
       req(input$menu1)
       req(input$menu2)
       req(input$menu3)
@@ -326,7 +324,6 @@ shinyServer(function(input, output, session) {
   #  })
   
   output$control1 <- renderUI({
-    req(input$def)
     
     X2<- MergedDefinitionWithFilteredDefinitions$df[[input$def]]
     choicesAlt<-ImportedData[ImportedData$ID %in% X2,
@@ -343,8 +340,6 @@ shinyServer(function(input, output, session) {
   ## Makes 2st filter appear. choices based on Level2 options after Level1 filter applied
   
   output$control2 <- renderUI({
-    req(input$def)
-    
     x <- input$menu1
     X2<- MergedDefinitionWithFilteredDefinitions$df[[input$def]]
     choice2 <- ImportedData[ImportedData$Level1 %in% x,
@@ -357,8 +352,6 @@ shinyServer(function(input, output, session) {
   ## Makes 3rd filter appear. choices based on previous filters
   
   output$control3 <- renderUI({
-    req(input$def)
-    
     x <- input$menu1
     y <- input$menu2
     X2<- MergedDefinitionWithFilteredDefinitions$df[[input$def]]
@@ -373,8 +366,6 @@ shinyServer(function(input, output, session) {
   ## 4th filter based on first three
   
   output$control4 <- renderUI({
-    req(input$def)
-    
     x <- input$menu1
     y <- input$menu2
     z <- input$menu3

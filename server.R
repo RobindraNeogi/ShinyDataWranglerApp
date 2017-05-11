@@ -51,8 +51,8 @@ DefinitionsData$All<-DefinitionsData$ID
 # into a table with the contextual data based on code (made up of LA Code and Year)
 
 # Ignore, Windows location, ContextualData <-read.csv("C:\\Users\\neog968\\Desktop\\contextualdata.csv",header=TRUE)
-ContextualData <-read.csv("/Users/datascience4/Documents/datatool/contextualdata.csv",header=TRUE)
 
+# ContextualData <-read.csv("/Users/datascience4/Documents/datatool/contextualdata.csv",header=TRUE)
 
 # Main Server:
 
@@ -89,7 +89,8 @@ shinyServer(function(input, output, session) {
   
   # This filters the main imported data by the four input filters
   
-  FilteredImportData<-reactive({FilteredImportData <-ImportedData[ImportedData$Level1 %in% input$menu1,]
+  FilteredImportData<-reactive({FilteredImportData <-
+  ImportedData<-ImportedData[ImportedData$Level1 %in% input$menu1,]
   ImportedData<-ImportedData[ImportedData$Level2 %in% input$menu2,]
   ImportedData<-ImportedData[ImportedData$Level3 %in% input$menu3,]
   ImportedData<-ImportedData[ImportedData$Level4 %in% input$menu4,]
@@ -97,7 +98,8 @@ shinyServer(function(input, output, session) {
   
   # This filters the definitions data in parralel to main imported data by the four input filters
   
-  FilteredDefinitionsData<-reactive({DefinitionsData2 <-DefinitionsData2[DefinitionsData2$Level1 %in% input$menu1,]
+  FilteredDefinitionsData<-reactive({
+  DefinitionsData2 <-DefinitionsData2[DefinitionsData2$Level1 %in% input$menu1,]
   DefinitionsData2<-DefinitionsData2[DefinitionsData2$Level2 %in% input$menu2,]
   DefinitionsData2<-DefinitionsData2[DefinitionsData2$Level3 %in% input$menu3,]
   DefinitionsData2<-DefinitionsData2[DefinitionsData2$Level4 %in% input$menu4,]
@@ -410,7 +412,7 @@ shinyServer(function(input, output, session) {
     
     choicedef <- names(MergedDefinitionWithFilteredDefinitions$df)[-(1:6)]
     
-    selectInput("def", "Template", choices = choicedef,selected="ID")
+    selectInput("def", "Default filters based on:", choices = choicedef,selected="ID")
   })
   
   # select 2nd variable to use in calculation. set so first 4 are not selectable as these are factors not numerical

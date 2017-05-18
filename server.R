@@ -458,14 +458,14 @@ shinyServer(function(input, output, session) {
   
   output$Kycol <- renderUI({
     
-    choiceycol <- names(MergedContextualDataWithSubset$df)[-(1:4)]
+    choiceycol <- names(workingdata)[-(1:5)]
     selectInput("Kycol", "Metric part 2", choices = choiceycol)
     
   })
   
   output$Kxcol <- renderUI({
     
-    choiceycol <- names(MergedContextualDataWithSubset$df)[-(1:4)]
+    choiceycol <- names(workingdata)[-(1:5)]
     selectInput("Kxcol", "Metric part 2", choices = choiceycol)
     
   })
@@ -478,18 +478,12 @@ shinyServer(function(input, output, session) {
   
   # MergedContextualDataWithSubset2<-MergedContextualDataWithSubset
   
-  
-  KselectedData<-DataforK<-ContextualData[,-c(1:4)]
-  
-  #KselectedData<-MergedContextualDataWithSubset[[-(1:4)]]
-  
-  
-  #KselectedData <- reactive({
-  # DataforK[, c(input$Kxcol, input$Kycol)]
-  #})
+  KselectedData <- reactive({
+    workingdata[, c(input$Kxcol, input$Kycol)]
+  })
   
   clusters <- reactive({
-    kmeans(KselectedData, input$clusters)
+    kmeans(KselectedData(), input$clusters)
   })
   
   output$plot1 <- renderPlot({
@@ -497,7 +491,7 @@ shinyServer(function(input, output, session) {
               "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999"))
     
     par(mar = c(5.1, 4.1, 0, 1))
-    plot(KselectedData,
+    plot(KselectedData(),
          col = clusters()$cluster,
          pch = 20, cex = 3)
     points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
@@ -505,35 +499,62 @@ shinyServer(function(input, output, session) {
   
   MergedContextualDataWithSubset2<-MergedContextualDataWithSubset
   
-  #newdata <- mtcars[order(mpg),] 
+  
+  
+  
+  
+  
+  
+  
   
   # Fill in the spot we created for a plot
   
-  output$region <- renderUI({
+  barchartdata<-reactiveValues()
+  barchartdata$df<-workingdata[ -c(1:5) ]
+  
+  
+  output$barselect <- renderUI({
+  
     
-    choiceycol <- names(MergedContextualDataWithSubset2$df)[-(1:4)]
-    selectInput("region", "Metric part 2", choices = choiceycol)
+    choiceycol <- names(workingdata[ -c(1:5) ])
+    selectInput("barselect", "Metric part 2", choices = choiceycol)
     
   })
   
-  
+  # Fill in the spot we created for a plot
   output$barchart <- renderPlot({
     
     # Render a barplot
-    barplot<-MergedContextualDataWithSubset2$df[,input$region]
+    # Basic barplot
+    p<-ggplot(data=workingdata, aes
+              (x=Area,workingdata[,input$region], y=workingdata[,input$region])) +
+      geom_bar(stat="identity")+
+      theme(axis.title.x=element_blank(),
+            axis.text.x=element_blank(),
+            axis.ticks.x=element_blank())
+    p
     
-    
-    barplot(barplot,
-            main=input$region,
-            ylab="",
-            xlab="")
   })
   
+  
+  # Fill in the spot we created for a plot
+  output$boxjitter <- renderPlot({
+    
+    # Render a boxplot
+    p <- ggplot(workingdata, aes(Type, workingdata[,input$region]))
+    p + geom_boxplot()+ geom_jitter(width = 0.2)
+    
+  })
+  
+  output$chartvariable <- renderUI({
+    selectInput("region", "Region:", 
+                choices=colnames(workingdata)[-c(1:5)])
+  })
   
   #temp[order(temp[, 1]),]
   
   
-  data<-reactive({MergedContextualDataWithSubset2$df[,input$region]
+  data<-reactive({barchartdata$df[,input$region]
   })
   
   

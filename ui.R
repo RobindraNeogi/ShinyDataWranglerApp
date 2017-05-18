@@ -35,16 +35,17 @@ navbarPage(
     
     mainPanel(
       # tableOutput("ImportedDataFiltered"),
+      collapsibleTree(
+        WGA,
+        hierarchy = c("Level1", "Level2", "Level3","Level4","Level5"),
+        width = 1200,
+        height=400),
       HTML("<br><br>"),
       # Table shows filtered import data
       DT::dataTableOutput('ImportedDataFiltered'),
       downloadButton('DownloadFilteredData', 'Download'),
-      HTML("<br><br>"),
-      collapsibleTree(
-        Dim,
-        hierarchy = c("Level1", "Level2", "Level3","Level4","Level5"),
-        width = 1200,
-        height=600)
+      HTML("<br><br>")
+      
     )
     
     
@@ -89,7 +90,7 @@ navbarPage(
   ),
   
   tabPanel(
-    'Work in progress Clustering',
+    'K-Means',
     
     sidebarPanel(
       uiOutput("Kxcol"),
@@ -105,10 +106,11 @@ navbarPage(
     'Charts',
     
     sidebarPanel(
-      uiOutput("region")
+      uiOutput("chartvariable")
     ),
     mainPanel(
-      plotOutput("barchart")
+      plotOutput("barchart"),
+      plotOutput("boxjitter")
     )
   )
   

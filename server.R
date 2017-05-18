@@ -1,11 +1,8 @@
 library(shiny)
 library(shinydashboard)
 
-
 # this is the location of the main data file on my windows machine
 # ImportedData <-read.csv("C:\\Users\\neog968\\Desktop\\wgadata.csv",header=TRUE)
-
-
 # this is the location of my main data file
 #ImportedData <-read.csv("/Users/datascience4/Documents/datatool/wgadata.csv",header=TRUE)
 
@@ -290,7 +287,7 @@ shinyServer(function(input, output, session) {
   
   # Display text for k tb
   output$MergedData2 <- DT::renderDataTable(
-    DT::datatable(MergedContextualDataWithSubset2$df, options = list(searching = FALSE),
+    DT::datatable(kmeansdata, options = list(searching = FALSE),
                   rownames= FALSE))
   
   # Download handler for final output data
@@ -471,13 +468,19 @@ shinyServer(function(input, output, session) {
   })
   
   
+  output$kmeansvariables <- renderUI({
+    
+    choiceycol <- names(workingdata)[-(1:5)]
+    selectInput("Kxcol", "Metric part 2", choices = choiceycol, multiple=TRUE)
+    
+  })
+  
+  
+  
   # from shiny gallery k-means clustering need to adapt
   
-  MergedContextualDataWithSubset2 <- MergedContextualDataWithSubset
-  
-  
-  # MergedContextualDataWithSubset2<-MergedContextualDataWithSubset
-  
+  kmeansdata <- workingdata
+    
   KselectedData <- reactive({
     workingdata[, c(input$Kxcol, input$Kycol)]
   })
@@ -497,8 +500,7 @@ shinyServer(function(input, output, session) {
     points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
   })
   
-  MergedContextualDataWithSubset2<-MergedContextualDataWithSubset
-  
+
   
   
   

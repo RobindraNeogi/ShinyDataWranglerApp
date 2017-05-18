@@ -5,7 +5,8 @@
 #
 
 library(shiny)
-
+library(collapsibleTree)
+library("ggplot2")
 
 navbarPage(
   title = 'WGA Analysis Tool',
@@ -38,7 +39,12 @@ navbarPage(
       # Table shows filtered import data
       DT::dataTableOutput('ImportedDataFiltered'),
       downloadButton('DownloadFilteredData', 'Download'),
-      HTML("<br><br>")
+      HTML("<br><br>"),
+      collapsibleTree(
+        Dim,
+        hierarchy = c("Level1", "Level2", "Level3","Level4","Level5"),
+        width = 1200,
+        height=600)
     )
     
     
@@ -107,3 +113,4 @@ navbarPage(
   )
   
 )
+

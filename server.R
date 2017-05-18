@@ -12,11 +12,11 @@ library(shinydashboard)
 #create a data frame of unique rows of dimenstions from the same source as import data
 
 DefinitionsData<-ImportedData
+
 #Drop LA code/year column and value column
 DefinitionsData<-DefinitionsData[,-c(1,8)]
 #Remove duplicate rows so left with just the possible dimensions
 DefinitionsData <- unique(DefinitionsData)
-
 
 
 #Duplicate definitions data to be filtered in parallel to main import data
@@ -76,7 +76,7 @@ shinyServer(function(input, output, session) {
   output$ImportedDataFiltered <- DT::renderDataTable(
     DT::datatable(FilteredImportData(), options = list(searching = FALSE),
                   rownames= FALSE)
-    )
+  )
   
   
   
@@ -346,7 +346,7 @@ shinyServer(function(input, output, session) {
     
     
     selectInput("menu1", "Select Level 1", choices = unique(ImportedData$Level1),
-                selected= choicesAlt,multiple=TRUE)
+                selected= choicesAlt[1])
   })
   
   
@@ -476,7 +476,7 @@ shinyServer(function(input, output, session) {
   MergedContextualDataWithSubset2 <- MergedContextualDataWithSubset
   
   
- # MergedContextualDataWithSubset2<-MergedContextualDataWithSubset
+  # MergedContextualDataWithSubset2<-MergedContextualDataWithSubset
   
   
   KselectedData<-DataforK<-ContextualData[,-c(1:4)]
@@ -485,7 +485,7 @@ shinyServer(function(input, output, session) {
   
   
   #KselectedData <- reactive({
-   # DataforK[, c(input$Kxcol, input$Kycol)]
+  # DataforK[, c(input$Kxcol, input$Kycol)]
   #})
   
   clusters <- reactive({
@@ -504,7 +504,7 @@ shinyServer(function(input, output, session) {
   })
   
   MergedContextualDataWithSubset2<-MergedContextualDataWithSubset
-
+  
   #newdata <- mtcars[order(mpg),] 
   
   # Fill in the spot we created for a plot
@@ -520,14 +520,22 @@ shinyServer(function(input, output, session) {
   output$barchart <- renderPlot({
     
     # Render a barplot
-    barplot(MergedContextualDataWithSubset2$df[,input$region], 
+    barplot<-MergedContextualDataWithSubset2$df[,input$region]
+    
+    
+    barplot(barplot,
             main=input$region,
             ylab="",
             xlab="")
   })
+  
+  
+  #temp[order(temp[, 1]),]
+  
   
   data<-reactive({MergedContextualDataWithSubset2$df[,input$region]
   })
   
   
 })
+

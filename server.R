@@ -1,5 +1,7 @@
 library(shiny)
 library(plotly)
+library(NbClust)
+
 
 # this is the location of the main data file on my windows machine
 # ImportedData <-read.csv("C:\\Users\\neog968\\Desktop\\wgadata.csv",header=TRUE)
@@ -460,6 +462,12 @@ shinyServer(function(input, output, session) {
     selectInput("kmeansLAtype", "kmeansLAtype", choices = unique(workingdata$Type))
   })
   
+  output$clusters <- renderUI({
+    
+    numericInput('clusters', 'Cluster count',  Nb()$Best.nc[1],
+                 min = 1, max = 9)
+  })
+  
   
   # from shiny gallery k-means clustering need to adapt
   
@@ -468,6 +476,12 @@ shinyServer(function(input, output, session) {
   KselectedData <- reactive({
     kmeansdata[kmeansdata$Type %in% input$kmeansLAtype, c(input$Kxcol)]
   })
+  
+  Nb<- reactive({NbClust(data = KselectedData(), diss = NULL, distance = "euclidean",
+          min.nc = 1, max.nc = 9, method ="complete", index = "silhouette")
+  })
+  
+  
   
   KselectedData2 <- reactive({
     cbind(kmeansdata[kmeansdata$Type %in% input$kmeansLAtype, c('Area',input$Kxcol)],clusters()$cluster)
@@ -497,13 +511,23 @@ shinyServer(function(input, output, session) {
     plot(silhouette(clusters()$cluster, D),col=unique(clusters()$cluster), border=NA)
   })
   
-  
   # Display text for k tb
   
   output$kmeans <- renderPrint({
     dataset <- clusters()
     summary(dataset)
   })
+  
+  output$optimalclusters <- renderPrint({
+    
+    summary(Nb())
+  })
+  
+  output$optimalclusters2 <- renderPrint({
+    
+    Nb()$Best.nc[1]
+  })
+ 
   
   output$MergedData2 <- DT::renderDataTable(
     DT::datatable(KselectedData2(), options = list(searching = FALSE),

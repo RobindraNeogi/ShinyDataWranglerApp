@@ -1,8 +1,7 @@
-
-
 library(shiny)
 library(collapsibleTree)
-library("ggplot2")
+library(ggplot2)
+library(plotly)
 
 navbarPage(
   title = 'WGA Analysis Tool',
@@ -27,6 +26,8 @@ navbarPage(
       #Level 4 filter, multiple choice, choices depend on previous filters, defaut selection based on 'def' input
       uiOutput("control4"),
       
+      #Level 4 filter, multiple choice, choices depend on previous filters, defaut selection based on 'def' input
+      uiOutput("controlL5"),
       
       # Merge button will add filtered subset to the working data set
       actionButton("Merge", "Create aggregate"),
@@ -58,7 +59,7 @@ navbarPage(
       
     )
     
- #Tab 2 ######################################################################################################################################   
+    #Tab 2 ######################################################################################################################################   
     
   ),
   tabPanel(
@@ -99,36 +100,30 @@ navbarPage(
       DT::dataTableOutput("MergedData"),
       HTML("<br><br>"))
   ),
- 
- #tab 3 k-means clustering ######################################################################################
- 
+  
+  #tab 3 k-means clustering ######################################################################################
+  
   tabPanel(
     'K-Means',
     
     sidebarPanel(
       
-      # chose columns for x axis for scatterplot
-      uiOutput("Kxcol"),
-      
-      # chose columns for y axis for scatterplot
-      uiOutput("Kycol"),
-      
       numericInput('clusters', 'Cluster count', 3,
                    min = 1, max = 9),
       
       # not yet implemented, multi choice list for creating dataset with more than 2 variables for kmeans
-      uiOutput("kmeansvariables")
+      uiOutput("kmeansvariables"),
+      uiOutput("kmeansLAtype")
     ),
     
     #Scatter plot of selected x and y variables
     mainPanel(plotOutput('plot1'),
-              
-    # this is not yet implemented, want it to display data created with kmeansvariables input mentioned above 
+              # this is not yet implemented, want it to display data created with kmeansvariables input mentioned above 
               DT::dataTableOutput("MergedData2"))
   ),
   
- # tab 4 charts ###########################################################################################################
- 
+  # tab 4 charts ###########################################################################################################
+  
   tabPanel(
     'Charts',
     
@@ -137,10 +132,9 @@ navbarPage(
       uiOutput("chartvariable")
     ),
     mainPanel(
-      plotOutput("barchart"),
-      plotOutput("boxjitter")
+      plotlyOutput("barchart"),
+      plotlyOutput("boxjitter")
     )
   )
   
 )
-

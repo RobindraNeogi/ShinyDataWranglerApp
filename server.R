@@ -1,5 +1,5 @@
 library(shiny)
-library(shinydashboard)
+library(plotly)
 
 # this is the location of the main data file on my windows machine
 # ImportedData <-read.csv("C:\\Users\\neog968\\Desktop\\wgadata.csv",header=TRUE)
@@ -71,6 +71,7 @@ shinyServer(function(input, output, session) {
   
   
   output$ImportedDataFiltered <- DT::renderDataTable(
+    
     DT::datatable(FilteredImportData(), options = list(searching = FALSE),
                   rownames= FALSE)
   )
@@ -97,6 +98,7 @@ shinyServer(function(input, output, session) {
   ImportedData<-ImportedData[ImportedData$Level2 %in% input$menu2,]
   ImportedData<-ImportedData[ImportedData$Level3 %in% input$menu3,]
   ImportedData<-ImportedData[ImportedData$Level4 %in% input$menu4,]
+  ImportedData<-ImportedData[ImportedData$Level5 %in% input$menu5,]
   })
   
   # This filters the definitions data in parralel to main imported data by the four input filters
@@ -106,7 +108,12 @@ shinyServer(function(input, output, session) {
     DefinitionsData2<-DefinitionsData2[DefinitionsData2$Level2 %in% input$menu2,]
     DefinitionsData2<-DefinitionsData2[DefinitionsData2$Level3 %in% input$menu3,]
     DefinitionsData2<-DefinitionsData2[DefinitionsData2$Level4 %in% input$menu4,]
+    DefinitionsData2<-DefinitionsData2[DefinitionsData2$Level5 %in% input$menu5,]
   })
+  
+  
+  
+  
   
   
   # This aggregates the imported data value filed based on filter selection down to 'code' level
@@ -285,11 +292,7 @@ shinyServer(function(input, output, session) {
     DT::datatable(MergedContextualDataWithSubset$df, options = list(searching = FALSE),
                   rownames= FALSE))
   
-  # Display text for k tb
-  output$MergedData2 <- DT::renderDataTable(
-    DT::datatable(kmeansdata, options = list(searching = FALSE),
-                  rownames= FALSE))
-  
+ 
   # Download handler for final output data
   
   output$testdownload <- downloadHandler(
@@ -303,34 +306,9 @@ shinyServer(function(input, output, session) {
   
   ## UI Elements
   
-  ## Lists what has been entered in each menu (used zz, and zzz because I adapted something that had just x,y,z)
   
-  output$FilterChoices <- renderText({
-    x <- input$menu1
-    y <- input$menu2
-    z <- input$menu3
-    zz<- input$menu4
-    zzz<- input$menu5
-    
-    ## This is left over from the code I borrowed online. It makes the word 'select' appear
-    ## if filters are empty, but my version has all valid options selected by default so I have deactivated it
-    
-    # if (any(
-    #  is.null(x),
-    # is.null(y),
-    #is.null(z),
-    #is.null(zz),
-    #is.null(zzz)
-    #  ))
-    #   return("Select")
-    
-  })
   
-  ## Makes 1st filter appear. options based on unique items in column, default selection is "Reserves"
   
-  #output$control1 <- renderUI({
-  #  selectInput("menu1", "Select Level 1", choices = unique(ImportedData$Level1),selected="Reserves",multiple=TRUE)
-  #  })
   
   output$control1 <- renderUI({
     req(input$def)
@@ -343,7 +321,7 @@ shinyServer(function(input, output, session) {
     
     
     selectInput("menu1", "Select Level 1", choices = unique(ImportedData$Level1),
-                selected= choicesAlt[1])
+                selected= choicesAlt['2'])
   })
   
   
@@ -393,6 +371,26 @@ shinyServer(function(input, output, session) {
     
     selectInput("menu4", "Select Level 4", choices = sort(unique(choice4)),selected=choicesAlt4,multiple=TRUE)
   })
+  
+  output$controlL5 <- renderUI({
+    req(input$def)
+    
+    x <- input$menu1
+    y <- input$menu2
+    z <- input$menu3
+    new <- input$menu4
+    X2<- MergedDefinitionWithFilteredDefinitions$df[[input$def]]
+    choicesAlt5<-ImportedData[ImportedData$ID %in% X2,
+                              "Level5"]
+    choice5 <- ImportedData[ImportedData$Level1 %in% x & ImportedData$Level2 %in% y & ImportedData$Level3 %in% z
+                            & ImportedData$Level4 %in% new,
+                            "Level5"]
+    
+    selectInput("menu5", "Select Level 5", choices = sort(unique(choice5)),selected=choicesAlt5,multiple=TRUE)
+  })
+  
+  
+  
   
   ## 5th filter based on first three, dont think I need to filter on this column and too many options so deactivated it
   
@@ -449,25 +447,6 @@ shinyServer(function(input, output, session) {
     
   })
   
-  
-  
-  
-  
-  output$Kycol <- renderUI({
-    
-    choiceycol <- names(workingdata)[-(1:5)]
-    selectInput("Kycol", "Metric part 2", choices = choiceycol)
-    
-  })
-  
-  output$Kxcol <- renderUI({
-    
-    choiceycol <- names(workingdata)[-(1:5)]
-    selectInput("Kxcol", "Metric part 2", choices = choiceycol)
-    
-  })
-  
-  
   output$kmeansvariables <- renderUI({
     
     choiceycol <- names(workingdata)[-(1:5)]
@@ -476,14 +455,24 @@ shinyServer(function(input, output, session) {
   })
   
   
+  output$kmeansLAtype <- renderUI({
+    
+    selectInput("kmeansLAtype", "kmeansLAtype", choices = unique(workingdata$Type))
+  })
+  
   
   # from shiny gallery k-means clustering need to adapt
   
   kmeansdata <- workingdata
-    
+  
   KselectedData <- reactive({
-    workingdata[, c(input$Kxcol, input$Kycol)]
+    workingdata[workingdata$Type %in% input$kmeansLAtype, c(input$Kxcol)]
   })
+  
+  KselectedData2 <- reactive({
+    cbind(workingdata[workingdata$Type %in% input$kmeansLAtype, c('Area',input$Kxcol)],clusters()$cluster)
+ })
+  
   
   clusters <- reactive({
     kmeans(KselectedData(), input$clusters)
@@ -500,7 +489,11 @@ shinyServer(function(input, output, session) {
     points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
   })
   
-
+  # Display text for k tb
+  
+  output$MergedData2 <- DT::renderDataTable(
+    DT::datatable(KselectedData2(), options = list(searching = FALSE),
+                  rownames= FALSE))
   
   
   
@@ -511,12 +504,7 @@ shinyServer(function(input, output, session) {
   
   # Fill in the spot we created for a plot
   
-  barchartdata<-reactiveValues()
-  barchartdata$df<-workingdata[ -c(1:5) ]
-  
-  
   output$barselect <- renderUI({
-  
     
     choiceycol <- names(workingdata[ -c(1:5) ])
     selectInput("barselect", "Metric part 2", choices = choiceycol)
@@ -524,12 +512,12 @@ shinyServer(function(input, output, session) {
   })
   
   # Fill in the spot we created for a plot
-  output$barchart <- renderPlot({
+  output$barchart <- renderPlotly({
     
     # Render a barplot
     # Basic barplot
     p<-ggplot(data=workingdata, aes
-              (x=Area,workingdata[,input$region], y=workingdata[,input$region])) +
+              (x=Area, y=workingdata[input$region])) +
       geom_bar(stat="identity")+
       theme(axis.title.x=element_blank(),
             axis.text.x=element_blank(),
@@ -540,7 +528,7 @@ shinyServer(function(input, output, session) {
   
   
   # Fill in the spot we created for a plot
-  output$boxjitter <- renderPlot({
+  output$boxjitter <- renderPlotly({
     
     # Render a boxplot
     p <- ggplot(workingdata, aes(Type, workingdata[,input$region]))
@@ -561,4 +549,5 @@ shinyServer(function(input, output, session) {
   
   
 })
+
 

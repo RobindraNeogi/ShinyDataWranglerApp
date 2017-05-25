@@ -113,11 +113,14 @@ navbarPage(
       
       # not yet implemented, multi choice list for creating dataset with more than 2 variables for kmeans
       uiOutput("kmeansvariables"),
-      uiOutput("kmeansLAtype")
+      uiOutput("kmeansLAtype"),
+      verbatimTextOutput("kmeans")
     ),
     
     #Scatter plot of selected x and y variables
     mainPanel(plotOutput('plot1'),
+              
+              plotOutput('sil'),
               # this is not yet implemented, want it to display data created with kmeansvariables input mentioned above 
               DT::dataTableOutput("MergedData2"))
   ),

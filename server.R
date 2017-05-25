@@ -450,7 +450,7 @@ shinyServer(function(input, output, session) {
   output$kmeansvariables <- renderUI({
     
     choiceycol <- names(workingdata)[-(1:5)]
-    selectInput("Kxcol", "Metric part 2", choices = choiceycol, multiple=TRUE)
+    selectInput("Kxcol", "Choose variables for clustering", choices = choiceycol, multiple=TRUE, selected=names(workingdata)[-(1:7)])
     
   })
   
@@ -466,11 +466,12 @@ shinyServer(function(input, output, session) {
   kmeansdata <- workingdata
   
   KselectedData <- reactive({
-    workingdata[workingdata$Type %in% input$kmeansLAtype, c(input$Kxcol)]
+    kmeansdata[kmeansdata$Type %in% input$kmeansLAtype, c(input$Kxcol)]
   })
   
   KselectedData2 <- reactive({
-    cbind(workingdata[workingdata$Type %in% input$kmeansLAtype, c('Area',input$Kxcol)],clusters()$cluster)
+    cbind(kmeansdata[kmeansdata$Type %in% input$kmeansLAtype, c('Area',input$Kxcol)],clusters()$cluster)
+    
  })
   
   
@@ -489,7 +490,20 @@ shinyServer(function(input, output, session) {
     points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
   })
   
+  # https://stackoverflow.com/questions/32570693/make-silhouette-plot-legible-for-k-means
+  output$sil <- renderPlot({
+    X <- KselectedData()
+    D <- daisy(X)
+    plot(silhouette(clusters()$cluster, D),col=unique(clusters()$cluster), border=NA)
+  })
+  
+  
   # Display text for k tb
+  
+  output$kmeans <- renderPrint({
+    dataset <- clusters()
+    summary(dataset)
+  })
   
   output$MergedData2 <- DT::renderDataTable(
     DT::datatable(KselectedData2(), options = list(searching = FALSE),

@@ -1,6 +1,8 @@
 library(shiny)
 library(plotly)
 library(NbClust)
+library (cluster)
+library(vegan)
 
 
 # this is the location of the main data file on my windows machine
@@ -294,7 +296,7 @@ shinyServer(function(input, output, session) {
     DT::datatable(MergedContextualDataWithSubset$df, options = list(searching = FALSE),
                   rownames= FALSE))
   
- 
+  
   # Download handler for final output data
   
   output$testdownload <- downloadHandler(
@@ -478,7 +480,7 @@ shinyServer(function(input, output, session) {
   })
   
   Nb<- reactive({NbClust(data = KselectedData(), diss = NULL, distance = "euclidean",
-          min.nc = 1, max.nc = 9, method ="complete", index = "silhouette")
+                         min.nc = 1, max.nc = 9, method ="complete", index = "silhouette")
   })
   
   
@@ -486,7 +488,7 @@ shinyServer(function(input, output, session) {
   KselectedData2 <- reactive({
     cbind(kmeansdata[kmeansdata$Type %in% input$kmeansLAtype, c('Area',input$Kxcol)],clusters()$cluster)
     
- })
+  })
   
   
   clusters <- reactive({
@@ -527,7 +529,7 @@ shinyServer(function(input, output, session) {
     
     Nb()$Best.nc[1]
   })
- 
+  
   
   output$MergedData2 <- DT::renderDataTable(
     DT::datatable(KselectedData2(), options = list(searching = FALSE),

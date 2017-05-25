@@ -5,6 +5,19 @@ library(plotly)
 
 navbarPage(
   title = 'WGA Analysis Tool',
+  
+  tabPanel(
+    'Explore WGA Structure',
+    
+    #collapsibleTree is a visual representation of the data dimensions, does not control anything but to aid exploration
+    
+    collapsibleTree(
+      WGA,
+      hierarchy = c("Level1", "Level2", "Level3","Level4","Level5"),
+      width = 1200,
+      height=700),
+    HTML("<br><br>")
+  ),
   tabPanel(
     'Create items',
     
@@ -41,14 +54,7 @@ navbarPage(
     
     mainPanel(
       
-      #collapsibleTree is a visual representation of the data dimensions, does not control anything but to aid exploration
       
-      collapsibleTree(
-        WGA,
-        hierarchy = c("Level1", "Level2", "Level3","Level4","Level5"),
-        width = 1200,
-        height=400),
-      HTML("<br><br>"),
       
       #Table shows the raw data after filters are applies
       DT::dataTableOutput('ImportedDataFiltered'),
@@ -106,7 +112,7 @@ navbarPage(
   tabPanel(
     'K-Means',
     
-    sidebarPanel(
+    sidebarPanel(width=3,
       
       
       uiOutput('clusters'),

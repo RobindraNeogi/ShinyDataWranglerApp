@@ -101,7 +101,7 @@ shinyServer(function(input, output, session) {
       paste("Definitions", '.csv', sep='')
     },
     content = function(file) {
-      write.csv(FilteredDefinitionsData(), file)
+      write.csv(MergedDefinitionWithFilteredDefinitions$df, file)
     }
   )
   
@@ -509,8 +509,9 @@ shinyServer(function(input, output, session) {
   kmeansoutputdata<-ContextualData
   
   KselectedData2 <- reactive({
+    Cluster<-clusters()$cluster
     kmeansoutputdata<-MergedContextualDataWithSubset$df
-    cbind(kmeansoutputdata[kmeansoutputdata$Type %in% input$kmeansLAtype, c('Area',input$Kxcol)],clusters()$cluster)
+    cbind(kmeansoutputdata[kmeansoutputdata$Type %in% input$kmeansLAtype, c('Area',input$Kxcol)],Cluster)
     
   })
   
@@ -557,34 +558,26 @@ shinyServer(function(input, output, session) {
     DT::datatable(KselectedData2(), options = list(searching = FALSE),
                   rownames= FALSE))
   
+ 
   
   
   
   
   
   
-  
-  # Fill in the spot we created for a plot
-  output$barchart <- renderPlotly({
-    
-    # Render a barplot
-    # Basic barplot
-    p<-ggplot(data=MergedContextualDataWithSubset$df, aes
-              (x=Area, y=MergedContextualDataWithSubset$df[[input$chartvar]])) +
-      geom_bar(stat="identity")+
-      theme(axis.title.x=element_blank(),
-            axis.text.x=element_blank(),
-            axis.ticks.x=element_blank())
-    p
-    
-  })
+  # Fill in the spot we created for a pl
   
   output$barchart2 <- renderPlot({
     
     # Render a barplot
     # Basic barplot
+    
+    x<-MergedContextualDataWithSubset$df$Area
+    y<-MergedContextualDataWithSubset$df[[input$chartvar]]
+   
+    
     p<-ggplot(data=MergedContextualDataWithSubset$df, aes
-              (x=Area, y=MergedContextualDataWithSubset$df[[input$chartvar]])) +
+              (x=reorder(x,y), y=y)) +
       geom_bar(stat="identity")+
       theme(axis.title.x=element_blank(),
             axis.text.x=element_blank(),
@@ -594,13 +587,6 @@ shinyServer(function(input, output, session) {
   })
   
   # Fill in the spot we created for a plot
-  output$boxjitter <- renderPlotly({
-    
-    # Render a boxplot
-    p <- ggplot(MergedContextualDataWithSubset$df, aes(Type, MergedContextualDataWithSubset$df[[input$chartvar]]))
-    p + geom_boxplot()+ geom_jitter(width = 0.2)
-    
-  })
   
   output$boxjitter2 <- renderPlot({
     
@@ -610,7 +596,10 @@ shinyServer(function(input, output, session) {
     
   })
   
-  
+
+  output$Charts <- DT::renderDataTable(
+    DT::datatable(MergedContextualDataWithSubset$df, options = list(searching = FALSE),
+                  rownames= FALSE))
   
   
   

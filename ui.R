@@ -146,10 +146,11 @@ navbarPage(
       uiOutput("chartvariable")
     ),
     mainPanel(
-      plotlyOutput("barchart"),
+     
       plotOutput("barchart2"),
-      plotlyOutput("boxjitter"),
-      plotOutput("boxjitter2")
+      plotOutput("boxjitter2"),
+      DT::dataTableOutput("Charts")
+      
     )
   )
   

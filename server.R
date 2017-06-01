@@ -596,7 +596,17 @@ shinyServer(function(input, output, session) {
     
   })
   
-
+  output$hist <- renderPlot({
+    ggplot(data=MergedContextualDataWithSubset$df, aes(MergedContextualDataWithSubset$df[[input$chartvar]])) + geom_histogram()
+  })
+  
+  output$summary <- renderPrint({
+    
+    summary(MergedContextualDataWithSubset$df[[input$chartvar]])
+  })
+  
+  
+  
   output$Charts <- DT::renderDataTable(
     DT::datatable(MergedContextualDataWithSubset$df, options = list(searching = FALSE),
                   rownames= FALSE))

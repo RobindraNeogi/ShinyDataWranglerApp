@@ -143,12 +143,15 @@ navbarPage(
     
     # select variable to display in charts
     sidebarPanel(
-      uiOutput("chartvariable")
+      uiOutput("chartvariable"),
+      verbatimTextOutput("summary")
     ),
     mainPanel(
      
       plotOutput("barchart2"),
       plotOutput("boxjitter2"),
+      plotOutput("hist"),
+      
       DT::dataTableOutput("Charts")
       
     )

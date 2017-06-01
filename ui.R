@@ -153,13 +153,14 @@ navbarPage(
       verbatimTextOutput("summary"),
       
       
-      sliderInput("integer", "Integer:",
-                  min=1, max=100, value=30),
+      
       
       
       fluidRow(
         column(6,
-               plotOutput("hist")
+               plotOutput("hist"),
+               sliderInput("integer", "Integer:",
+                           min=1, max=100, value=30)
         ),
         column(6,
                plotOutput("boxjitter2")

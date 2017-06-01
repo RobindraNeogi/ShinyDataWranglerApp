@@ -608,8 +608,8 @@ shinyServer(function(input, output, session) {
    
     
     p<-ggplot(data=MergedContextualDataWithSubset$df, aes
-              (x=reorder(x,y), y=y)) +
-      geom_bar(stat="identity")+
+              (x=reorder(x,y), y=y, color=Type)) +
+      geom_bar(stat="identity",fill="white")+
       theme(axis.title.x=element_blank(),
             axis.text.x=element_blank(),
             axis.ticks.x=element_blank())
@@ -623,7 +623,7 @@ shinyServer(function(input, output, session) {
     req(input$chartvar)
     
     # Render a boxplot
-    p <- ggplot(MergedContextualDataWithSubset$df, aes(Type, MergedContextualDataWithSubset$df[[input$chartvar]]))
+    p <- ggplot(MergedContextualDataWithSubset$df, aes(Type, MergedContextualDataWithSubset$df[[input$chartvar]],col=Type))
     p + geom_boxplot()+ geom_jitter(width = 0.2)
     
   })

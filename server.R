@@ -232,7 +232,7 @@ shinyServer(function(input, output, session) {
     
     if(input$button > 0) {
       
-      isolate(if(input$operator=="Divide by") {
+      isolate(if(input$operator=="%") {
         
         newvar <- isolate((MergedContextualDataWithSubset$df[[input$xcol]] / MergedContextualDataWithSubset$df[[input$ycol]]))
         isolate(MergedContextualDataWithSubset$df <- cbind(MergedContextualDataWithSubset$df, newvar))
@@ -241,8 +241,8 @@ shinyServer(function(input, output, session) {
         
       })
       
-      # If 'multiply' selected in operator input one selected variable is divided by another selected variable  
-      isolate(if(input$operator=="Multiply") {
+      # If '*' selected in operator input one selected variable is divided by another selected variable  
+      isolate(if(input$operator=="*") {
         
         newvar <- isolate((MergedContextualDataWithSubset$df[[input$xcol]] * MergedContextualDataWithSubset$df[[input$ycol]]))
         isolate(MergedContextualDataWithSubset$df <- cbind(MergedContextualDataWithSubset$df, newvar))
@@ -251,9 +251,9 @@ shinyServer(function(input, output, session) {
         
       })
       
-      # If 'Add' selected in operator input one selected variable is divided by another selected variable
+      # If '+' selected in operator input one selected variable is divided by another selected variable
       
-      isolate(if(input$operator=="Add") {
+      isolate(if(input$operator=="+") {
         
         newvar <- isolate((MergedContextualDataWithSubset$df[[input$xcol]] + MergedContextualDataWithSubset$df[[input$ycol]]))
         isolate(MergedContextualDataWithSubset$df <- cbind(MergedContextualDataWithSubset$df, newvar))
@@ -262,9 +262,9 @@ shinyServer(function(input, output, session) {
         
       })
       
-      # If 'Subtract' selected in operator input one selected variable is divided by another selected variable
+      # If '-' selected in operator input one selected variable is divided by another selected variable
       
-      isolate(if(input$operator=="Subtract") {
+      isolate(if(input$operator=="-") {
         
         newvar <- isolate((MergedContextualDataWithSubset$df[[input$xcol]] - MergedContextualDataWithSubset$df[[input$ycol]]))
         isolate(MergedContextualDataWithSubset$df <- cbind(MergedContextualDataWithSubset$df, newvar))
@@ -421,6 +421,13 @@ shinyServer(function(input, output, session) {
   
   
   # select a variable to use in calculation. set so first 4 are not selectable as these are factors not numerical
+  output$text2 <- renderUI({
+    name<-(({paste(input$xcol,input$operator,input$ycol) }))
+    textInput("text2", "Enter name of new metric", value =name)
+  })
+  
+  
+  
   output$xcol <- renderUI({
     
     choicexcol <- names(MergedContextualDataWithSubset$df)[-(1:4)]

@@ -80,16 +80,18 @@ navbarPage(
       selectInput(
         "operator",
         "operator:",
-        c("Divide by", "Multiply", "Add", "Subtract")
+        c("%", "*", "+", "-")
       ),
       
       # Select 2nd variable  for calc
       uiOutput("ycol"),
       
       # Name calc variable
-      textInput("text2", "Enter name of new metric", value = "Metric Name"),
+      
+      uiOutput("text2"),
       
       # Run calc
+      verbatimTextOutput("metric1"),
       actionButton("button", "Create metric"),
       HTML("<br><br>"),
       

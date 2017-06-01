@@ -89,12 +89,25 @@ shinyServer(function(input, output, session) {
   # This is the download handler for the filtered imported data, currently doesnt create filename correctly
   output$DownloadFilteredData <- downloadHandler(
     filename = function() {
-      paste("data-", Sys.Date(), ".csv", sep="")
+      paste("ContextualData", '.csv', sep='')
     },
     content = function(file) {
       write.csv(FilteredImportData$df, file)
     }
   )
+  
+  output$Definitions <- downloadHandler(
+    filename = function() {
+      paste("Definitions", '.csv', sep='')
+    },
+    content = function(file) {
+      write.csv(FilteredDefinitionsData(), file)
+    }
+  )
+  
+  
+  
+  
   
   # This filters the main imported data by the four input filters
   
@@ -302,7 +315,7 @@ shinyServer(function(input, output, session) {
   
   output$testdownload <- downloadHandler(
     filename = function() {
-      paste("data-", Sys.Date(), ".csv", sep="")
+      paste("ContextualData", Sys.Date(), ".csv", sep="")
     },
     content = function(file) {
       write.csv(MergedContextualDataWithSubset$df, file)

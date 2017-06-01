@@ -48,6 +48,7 @@ navbarPage(
       
       # Text input for name of filtered subset that will be added to working data set
       textInput("text", "Enter name of new aggregate", value = "Aggregate name"),
+      downloadButton('Definitions', 'Download'),
       HTML("<br>")
     ),
     

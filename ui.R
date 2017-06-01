@@ -113,16 +113,16 @@ navbarPage(
     'K-Means',
     
     sidebarPanel(width=3,
-      
-      
-      uiOutput('clusters'),
-      # not yet implemented, multi choice list for creating dataset with more than 2 variables for kmeans
-      uiOutput("kmeansvariables"),
-      uiOutput("kmeansLAtype"),
-      verbatimTextOutput("kmeans"),
-      verbatimTextOutput("optimalclusters"),
-      verbatimTextOutput("optimalclusters2")
-      
+                 
+                 
+                 uiOutput('clusters'),
+                 # not yet implemented, multi choice list for creating dataset with more than 2 variables for kmeans
+                 uiOutput("kmeansvariables"),
+                 uiOutput("kmeansLAtype"),
+                 verbatimTextOutput("kmeans"),
+                 verbatimTextOutput("optimalclusters"),
+                 verbatimTextOutput("optimalclusters2")
+                 
     ),
     
     #Scatter plot of selected x and y variables
@@ -144,7 +144,9 @@ navbarPage(
     ),
     mainPanel(
       plotlyOutput("barchart"),
-      plotlyOutput("boxjitter")
+      plotOutput("barchart2"),
+      plotlyOutput("boxjitter"),
+      plotOutput("boxjitter2")
     )
   )
   

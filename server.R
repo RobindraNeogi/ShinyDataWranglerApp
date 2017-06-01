@@ -8,7 +8,8 @@ library(vegan)
 # this is the location of the main data file on my windows machine
 # ImportedData <-read.csv("C:\\Users\\neog968\\Desktop\\wgadata.csv",header=TRUE)
 # this is the location of my main data file
-#ImportedData <-read.csv("/Users/datascience4/Documents/datatool/wgadata.csv",header=TRUE)
+#
+
 
 #create a data frame of unique rows of dimenstions from the same source as import data
 
@@ -453,15 +454,15 @@ shinyServer(function(input, output, session) {
   
   output$kmeansvariables <- renderUI({
     
-    choiceycol <- names(workingdata)[-(1:5)]
-    selectInput("Kxcol", "Choose variables for clustering", choices = choiceycol, multiple=TRUE, selected=names(workingdata)[-(1:7)])
+    choiceycol <- names(MergedContextualDataWithSubset$df)[-(1:5)]
+    selectInput("Kxcol", "Choose variables for clustering", choices = choiceycol, multiple=TRUE, selected=names(MergedContextualDataWithSubset$df)[-(1:5)])
     
   })
   
   
   output$kmeansLAtype <- renderUI({
     
-    selectInput("kmeansLAtype", "kmeansLAtype", choices = unique(workingdata$Type))
+    selectInput("kmeansLAtype", "kmeansLAtype", choices = unique(MergedContextualDataWithSubset$df$Type),multiple=TRUE,selected=unique(MergedContextualDataWithSubset$df$Type))
   })
   
   output$clusters <- renderUI({
@@ -473,20 +474,23 @@ shinyServer(function(input, output, session) {
   
   # from shiny gallery k-means clustering need to adapt
   
-  kmeansdata <- workingdata
+  
   
   KselectedData <- reactive({
+    kmeansdata <- MergedContextualDataWithSubset$df
     kmeansdata[kmeansdata$Type %in% input$kmeansLAtype, c(input$Kxcol)]
   })
   
   Nb<- reactive({NbClust(data = KselectedData(), diss = NULL, distance = "euclidean",
-                         min.nc = 1, max.nc = 9, method ="complete", index = "silhouette")
+                         min.nc = 5, max.nc = 25, method ="complete", index = "silhouette")
   })
   
   
+  kmeansoutputdata<-ContextualData
   
   KselectedData2 <- reactive({
-    cbind(kmeansdata[kmeansdata$Type %in% input$kmeansLAtype, c('Area',input$Kxcol)],clusters()$cluster)
+    kmeansoutputdata<-MergedContextualDataWithSubset$df
+    cbind(kmeansoutputdata[kmeansoutputdata$Type %in% input$kmeansLAtype, c('Area',input$Kxcol)],clusters()$cluster)
     
   })
   
@@ -496,21 +500,19 @@ shinyServer(function(input, output, session) {
   })
   
   output$plot1 <- renderPlot({
-    palette(c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
-              "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999"))
-    
     par(mar = c(5.1, 4.1, 0, 1))
     plot(KselectedData(),
-         col = clusters()$cluster,
+         col = (clusters()$cluster),
          pch = 20, cex = 3)
     points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
   })
   
   # https://stackoverflow.com/questions/32570693/make-silhouette-plot-legible-for-k-means
   output$sil <- renderPlot({
+    
     X <- KselectedData()
     D <- daisy(X)
-    plot(silhouette(clusters()$cluster, D),col=unique(clusters()$cluster), border=NA)
+    plot(silhouette(clusters()$cluster, D),col=unique(clusters()$cluster),border=NA)
   })
   
   # Display text for k tb
@@ -543,21 +545,12 @@ shinyServer(function(input, output, session) {
   
   
   # Fill in the spot we created for a plot
-  
-  output$barselect <- renderUI({
-    
-    choiceycol <- names(workingdata[ -c(1:5) ])
-    selectInput("barselect", "Metric part 2", choices = choiceycol)
-    
-  })
-  
-  # Fill in the spot we created for a plot
   output$barchart <- renderPlotly({
     
     # Render a barplot
     # Basic barplot
-    p<-ggplot(data=workingdata, aes
-              (x=Area, y=workingdata[input$region])) +
+    p<-ggplot(data=MergedContextualDataWithSubset$df, aes
+              (x=Area, y=MergedContextualDataWithSubset$df[[input$chartvar]])) +
       geom_bar(stat="identity")+
       theme(axis.title.x=element_blank(),
             axis.text.x=element_blank(),
@@ -566,28 +559,49 @@ shinyServer(function(input, output, session) {
     
   })
   
+  output$barchart2 <- renderPlot({
+    
+    # Render a barplot
+    # Basic barplot
+    p<-ggplot(data=MergedContextualDataWithSubset$df, aes
+              (x=Area, y=MergedContextualDataWithSubset$df[[input$chartvar]])) +
+      geom_bar(stat="identity")+
+      theme(axis.title.x=element_blank(),
+            axis.text.x=element_blank(),
+            axis.ticks.x=element_blank())
+    p
+    
+  })
   
   # Fill in the spot we created for a plot
   output$boxjitter <- renderPlotly({
     
     # Render a boxplot
-    p <- ggplot(workingdata, aes(Type, workingdata[,input$region]))
+    p <- ggplot(MergedContextualDataWithSubset$df, aes(Type, MergedContextualDataWithSubset$df[[input$chartvar]]))
     p + geom_boxplot()+ geom_jitter(width = 0.2)
     
   })
   
+  output$boxjitter2 <- renderPlot({
+    
+    # Render a boxplot
+    p <- ggplot(MergedContextualDataWithSubset$df, aes(Type, MergedContextualDataWithSubset$df[[input$chartvar]]))
+    p + geom_boxplot()+ geom_jitter(width = 0.2)
+    
+  })
+  
+  
+  
+  
+  
   output$chartvariable <- renderUI({
-    selectInput("region", "Region:", 
-                choices=colnames(workingdata)[-c(1:5)])
+    selectInput("chartvar", "chartvar:", 
+                choices=colnames(MergedContextualDataWithSubset$df)[-c(1:5)])
   })
   
   #temp[order(temp[, 1]),]
   
-  
-  data<-reactive({barchartdata$df[,input$region]
-  })
-  
-  
 })
+
 
 

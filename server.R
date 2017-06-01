@@ -472,6 +472,8 @@ shinyServer(function(input, output, session) {
     
   })
   
+  
+  
   output$kmeansvariables <- renderUI({
     
     choiceycol <- names(MergedContextualDataWithSubset$df)[-(1:5)]
@@ -481,14 +483,14 @@ shinyServer(function(input, output, session) {
   
   
   output$kmeansLAtype <- renderUI({
-    
+    req(input$Kxcol)
     selectInput("kmeansLAtype", "kmeansLAtype", choices = unique(MergedContextualDataWithSubset$df$Type),multiple=TRUE,selected=unique(MergedContextualDataWithSubset$df$Type))
   })
   
   output$clusters <- renderUI({
-    
+    req(input$Kxcol)
     numericInput('clusters', 'Cluster count',  Nb()$Best.nc[1],
-                 min = 1, max = 9)
+                 min = 2, max = 25)
   })
   
   
@@ -497,18 +499,26 @@ shinyServer(function(input, output, session) {
   
   
   KselectedData <- reactive({
+    req(input$Kxcol)
+    
     kmeansdata <- MergedContextualDataWithSubset$df
     kmeansdata[kmeansdata$Type %in% input$kmeansLAtype, c(input$Kxcol)]
   })
   
-  Nb<- reactive({NbClust(data = KselectedData(), diss = NULL, distance = "euclidean",
-                         min.nc = 5, max.nc = 25, method ="complete", index = "silhouette")
+  Nb<- reactive({
+    req(input$Kxcol)
+    min<-min(input$range)
+    max<-25
+    NbClust(data = KselectedData(), diss = NULL, distance = "euclidean",
+                         min.nc = min, max.nc = max, method ="complete", index = "silhouette")
   })
   
   
   kmeansoutputdata<-ContextualData
   
   KselectedData2 <- reactive({
+    req(input$Kxcol)
+
     Cluster<-clusters()$cluster
     kmeansoutputdata<-MergedContextualDataWithSubset$df
     cbind(kmeansoutputdata[kmeansoutputdata$Type %in% input$kmeansLAtype, c('Area',input$Kxcol)],Cluster)
@@ -517,10 +527,14 @@ shinyServer(function(input, output, session) {
   
   
   clusters <- reactive({
+    req(input$Kxcol)
+    
     kmeans(KselectedData(), input$clusters)
   })
   
   output$plot1 <- renderPlot({
+    req(input$Kxcol)
+    
     par(mar = c(5.1, 4.1, 0, 1))
     plot(KselectedData(),
          col = (clusters()$cluster),
@@ -530,6 +544,8 @@ shinyServer(function(input, output, session) {
   
   # https://stackoverflow.com/questions/32570693/make-silhouette-plot-legible-for-k-means
   output$sil <- renderPlot({
+    req(input$Kxcol)
+    
     
     X <- KselectedData()
     D <- daisy(X)
@@ -539,22 +555,42 @@ shinyServer(function(input, output, session) {
   # Display text for k tb
   
   output$kmeans <- renderPrint({
+    req(input$Kxcol)
+    
     dataset <- clusters()
     summary(dataset)
   })
   
+  
+  output$rangeno <- renderPrint({input$range[2]
+  })
+  
+  
   output$optimalclusters <- renderPrint({
+    req(input$Kxcol)
+    
     
     summary(Nb())
   })
   
+  output$sill <- renderPrint({
+    req(input$Kxcol)
+    (clusters())
+  })
+  
+  
   output$optimalclusters2 <- renderPrint({
+    req(input$Kxcol)
+    
     
     Nb()$Best.nc[1]
   })
   
   
+  
+  
   output$MergedData2 <- DT::renderDataTable(
+    
     DT::datatable(KselectedData2(), options = list(searching = FALSE),
                   rownames= FALSE))
   
@@ -568,6 +604,7 @@ shinyServer(function(input, output, session) {
   # Fill in the spot we created for a pl
   
   output$barchart2 <- renderPlot({
+    req(input$chartvar)
     
     # Render a barplot
     # Basic barplot
@@ -589,6 +626,7 @@ shinyServer(function(input, output, session) {
   # Fill in the spot we created for a plot
   
   output$boxjitter2 <- renderPlot({
+    req(input$chartvar)
     
     # Render a boxplot
     p <- ggplot(MergedContextualDataWithSubset$df, aes(Type, MergedContextualDataWithSubset$df[[input$chartvar]]))
@@ -597,29 +635,31 @@ shinyServer(function(input, output, session) {
   })
   
   output$hist <- renderPlot({
+    req(input$chartvar)
     ggplot(data=MergedContextualDataWithSubset$df, aes(MergedContextualDataWithSubset$df[[input$chartvar]])) + geom_histogram()
   })
   
   output$summary <- renderPrint({
+    req(input$chartvar)
     
     summary(MergedContextualDataWithSubset$df[[input$chartvar]])
   })
   
   
   
-  output$Charts <- DT::renderDataTable(
+  output$Charts <- 
+    DT::renderDataTable(
     DT::datatable(MergedContextualDataWithSubset$df, options = list(searching = FALSE),
                   rownames= FALSE))
   
   
   
   output$chartvariable <- renderUI({
-    selectInput("chartvar", "chartvar:", 
+    selectInput("chartvar", "Select variable:", 
                 choices=colnames(MergedContextualDataWithSubset$df)[-c(1:5)])
   })
   
-  #temp[order(temp[, 1]),]
-  
+
 })
 
 

@@ -119,19 +119,23 @@ navbarPage(
                  
                  
                  uiOutput('clusters'),
+                 sliderInput("range", "Set min/max",
+                             min = 2, max = 25, value = c(2,25)),
+                 verbatimTextOutput("rangeno"),
                  # not yet implemented, multi choice list for creating dataset with more than 2 variables for kmeans
                  uiOutput("kmeansvariables"),
                  uiOutput("kmeansLAtype"),
                  verbatimTextOutput("kmeans"),
                  verbatimTextOutput("optimalclusters"),
                  verbatimTextOutput("optimalclusters2")
-                 
     ),
     
     #Scatter plot of selected x and y variables
     mainPanel(plotOutput('plot1'),
               
               plotOutput('sil'),
+              verbatimTextOutput("sill"),
+              
               # this is not yet implemented, want it to display data created with kmeansvariables input mentioned above 
               DT::dataTableOutput("MergedData2"))
   ),
@@ -151,10 +155,11 @@ navbarPage(
       plotOutput("barchart2"),
       plotOutput("boxjitter2"),
       plotOutput("hist"),
-      
       DT::dataTableOutput("Charts")
       
     )
   )
+    
+  )
   
-)
+

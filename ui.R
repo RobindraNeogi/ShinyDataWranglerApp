@@ -146,20 +146,34 @@ navbarPage(
     'Charts',
     
     # select variable to display in charts
-    sidebarPanel(
+    
+   
       uiOutput("chartvariable"),
-      verbatimTextOutput("summary")
-    ),
-    mainPanel(
-     
+      
+      verbatimTextOutput("summary"),
+      
+      
+      sliderInput("integer", "Integer:",
+                  min=1, max=100, value=30),
+      
+      
+      fluidRow(
+        column(6,
+               plotOutput("hist")
+        ),
+        column(6,
+               plotOutput("boxjitter2")
+        )
+      ),
+      
       plotOutput("barchart2"),
-      plotOutput("boxjitter2"),
-      plotOutput("hist"),
+      
+      
       DT::dataTableOutput("Charts")
       
     )
   )
     
-  )
+  
   
 

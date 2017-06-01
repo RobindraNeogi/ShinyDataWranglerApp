@@ -594,12 +594,6 @@ shinyServer(function(input, output, session) {
     DT::datatable(KselectedData2(), options = list(searching = FALSE),
                   rownames= FALSE))
   
- 
-  
-  
-  
-  
-  
   
   # Fill in the spot we created for a pl
   
@@ -636,7 +630,9 @@ shinyServer(function(input, output, session) {
   
   output$hist <- renderPlot({
     req(input$chartvar)
-    ggplot(data=MergedContextualDataWithSubset$df, aes(MergedContextualDataWithSubset$df[[input$chartvar]])) + geom_histogram()
+    ggplot(data=MergedContextualDataWithSubset$df, 
+          aes(MergedContextualDataWithSubset$df[[input$chartvar]])) + geom_histogram(bins=input$integer)
+    
   })
   
   output$summary <- renderPrint({

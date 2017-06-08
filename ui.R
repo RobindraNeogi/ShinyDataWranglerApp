@@ -2,6 +2,7 @@ library(shiny)
 library(collapsibleTree)
 library(ggplot2)
 library(plotly)
+library(shinyBS)
 
 navbarPage(
   title = 'WGA Analysis Tool',
@@ -9,14 +10,13 @@ navbarPage(
   tabPanel(
     'Explore WGA Structure',
     
-    #collapsibleTree is a visual representation of the data dimensions, does not control anything but to aid exploration
+    sidebarPanel(width=3
+    ),
     
-    collapsibleTree(
-      WGA,
-      hierarchy = c("Level1", "Level2", "Level3","Level4","Level5"),
-      width = 1200,
-      height=700),
-    HTML("<br><br>")
+    mainPanel(
+    
+   
+    )
   ),
   tabPanel(
     'Create items',
@@ -60,6 +60,8 @@ navbarPage(
       #Table shows the raw data after filters are applies
       DT::dataTableOutput('ImportedDataFiltered2'),
       DT::dataTableOutput('ImportedDataFiltered'),
+      
+      
       
       
       #download button to download filtered data
@@ -170,6 +172,8 @@ navbarPage(
       column(4,
              plotOutput("boxjitter2")
       ),
+      
+      
       column(2,
              plotOutput("boxjitter3")
       )

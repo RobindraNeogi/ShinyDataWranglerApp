@@ -13,21 +13,21 @@ library(vegan)
 
 #create a data frame of unique rows of dimenstions from the same source as import data
 
-DefinitionsData<-ImportedData
+#DefinitionsData<-ImportedData
 
 #Drop LA code/year column and value column
-DefinitionsData<-DefinitionsData[,-c(1,8)]
+#DefinitionsData<-DefinitionsData[,-c(1,8)]
 #Remove duplicate rows so left with just the possible dimensions
-DefinitionsData <- unique(DefinitionsData)
+#DefinitionsData <- unique(DefinitionsData)
 
 
 #Duplicate definitions data to be filtered in parallel to main import data
-DefinitionsData2<-DefinitionsData
+#DefinitionsData2<-DefinitionsData
 #Create duplicate ID field as ID will disappear in merge
-DefinitionsData2$ID2<-DefinitionsData2$ID
+#DefinitionsData2$ID2<-DefinitionsData2$ID
 
 
-DefinitionsData$All<-DefinitionsData$ID
+#DefinitionsData$All<-DefinitionsData$ID
 
 
 
@@ -338,7 +338,7 @@ shinyServer(function(input, output, session) {
     #unique(MergedDefinitionWithFilteredDefinitions$df[['Level1']])
     
     
-    selectInput("menu1", "Select Level 1", choices = unique(ImportedData$Level1),selected=choicesAlt[1])
+    selectInput("menu1", "Select Level 1", choices = unique(ImportedData$Level1),selected=choicesAlt,multiple=TRUE)
   })
   
   
@@ -630,6 +630,8 @@ shinyServer(function(input, output, session) {
     p + geom_boxplot()+ geom_jitter(width = 0.2)
     
   })
+
+  
   
   output$boxjitter3 <- renderPlot({
     req(input$chartvar)
@@ -666,6 +668,9 @@ shinyServer(function(input, output, session) {
     DT::renderDataTable(
       DT::datatable(MergedContextualDataWithSubset$df, options = list(searching = FALSE),
                     rownames= FALSE))
+  
+  
+  
   
   
   

@@ -338,8 +338,7 @@ shinyServer(function(input, output, session) {
     #unique(MergedDefinitionWithFilteredDefinitions$df[['Level1']])
     
     
-    selectInput("menu1", "Select Level 1", choices = unique(ImportedData$Level1),
-                selected= choicesAlt['2'])
+    selectInput("menu1", "Select Level 1", choices = unique(ImportedData$Level1),selected=choicesAlt[1])
   })
   
   
@@ -510,7 +509,7 @@ shinyServer(function(input, output, session) {
     min<-min(input$range)
     max<-25
     NbClust(data = KselectedData(), diss = NULL, distance = "euclidean",
-                         min.nc = min, max.nc = max, method ="complete", index = "silhouette")
+            min.nc = min, max.nc = max, method ="complete", index = "silhouette")
   })
   
   
@@ -518,7 +517,7 @@ shinyServer(function(input, output, session) {
   
   KselectedData2 <- reactive({
     req(input$Kxcol)
-
+    
     Cluster<-clusters()$cluster
     kmeansoutputdata<-MergedContextualDataWithSubset$df
     cbind(kmeansoutputdata[kmeansoutputdata$Type %in% input$kmeansLAtype, c('Area',input$Kxcol)],Cluster)
@@ -534,12 +533,15 @@ shinyServer(function(input, output, session) {
   
   output$plot1 <- renderPlot({
     req(input$Kxcol)
+    cluster<-(clusters()$cluster)
+    palette(c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
+              "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999"))
     
     par(mar = c(5.1, 4.1, 0, 1))
     plot(KselectedData(),
-         col = (clusters()$cluster),
-         pch = 20, cex = 3)
-    points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
+         col = cluster,
+         pch = 20, cex = 2)
+    points(cluster, pch = 4, cex = 4, lwd = 2)
   })
   
   # https://stackoverflow.com/questions/32570693/make-silhouette-plot-legible-for-k-means
@@ -549,7 +551,8 @@ shinyServer(function(input, output, session) {
     
     X <- KselectedData()
     D <- daisy(X)
-    plot(silhouette(clusters()$cluster, D),col=unique(clusters()$cluster),border=NA)
+    cluster<-clusters()$cluster
+    plot(silhouette(cluster, D),border=NA)
   })
   
   # Display text for k tb
@@ -605,7 +608,7 @@ shinyServer(function(input, output, session) {
     
     x<-MergedContextualDataWithSubset$df$Area
     y<-MergedContextualDataWithSubset$df[[input$chartvar]]
-   
+    
     
     p<-ggplot(data=MergedContextualDataWithSubset$df, aes
               (x=reorder(x,y), y=y, color=Type)) +
@@ -628,10 +631,20 @@ shinyServer(function(input, output, session) {
     
   })
   
+  output$boxjitter3 <- renderPlot({
+    req(input$chartvar)
+    All<-factor(0)
+    # Render a boxplot
+    p <- ggplot(MergedContextualDataWithSubset$df, aes(x=All,MergedContextualDataWithSubset$df[[input$chartvar]]))
+    p + geom_boxplot()+ geom_jitter(width = 0.2)
+    
+  })
+  
+  
   output$hist <- renderPlot({
     req(input$chartvar)
     ggplot(data=MergedContextualDataWithSubset$df, 
-          aes(MergedContextualDataWithSubset$df[[input$chartvar]])) + geom_histogram(bins=input$integer)
+           aes(MergedContextualDataWithSubset$df[[input$chartvar]])) + geom_histogram(bins=input$integer)
     
   })
   
@@ -641,12 +654,18 @@ shinyServer(function(input, output, session) {
     summary(MergedContextualDataWithSubset$df[[input$chartvar]])
   })
   
+  output$summary2 <- renderPrint({
+    req(input$chartvar)
+    
+    tapply((MergedContextualDataWithSubset$df[[input$chartvar]]),MergedContextualDataWithSubset$df$Type,summary)
+  })
+  
   
   
   output$Charts <- 
     DT::renderDataTable(
-    DT::datatable(MergedContextualDataWithSubset$df, options = list(searching = FALSE),
-                  rownames= FALSE))
+      DT::datatable(MergedContextualDataWithSubset$df, options = list(searching = FALSE),
+                    rownames= FALSE))
   
   
   
@@ -655,8 +674,9 @@ shinyServer(function(input, output, session) {
                 choices=colnames(MergedContextualDataWithSubset$df)[-c(1:5)])
   })
   
-
+  
 })
+
 
 
 

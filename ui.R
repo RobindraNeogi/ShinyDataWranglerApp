@@ -58,7 +58,9 @@ navbarPage(
       
       
       #Table shows the raw data after filters are applies
+      DT::dataTableOutput('ImportedDataFiltered2'),
       DT::dataTableOutput('ImportedDataFiltered'),
+      
       
       #download button to download filtered data
       downloadButton('DownloadFilteredData', 'Download'),
@@ -147,34 +149,49 @@ navbarPage(
     
     # select variable to display in charts
     
-   
-      uiOutput("chartvariable"),
-      
-      verbatimTextOutput("summary"),
-      
-      
-      
-      
-      
-      fluidRow(
-        column(6,
-               plotOutput("hist"),
-               sliderInput("integer", "Integer:",
-                           min=1, max=100, value=30)
-        ),
-        column(6,
-               plotOutput("boxjitter2")
-        )
+    fluidRow(
+      column(6,
+             uiOutput("chartvariable")
+             
       ),
       
-      plotOutput("barchart2"),
-      
-      
-      DT::dataTableOutput("Charts")
-      
-    )
-  )
+      column(6,
+             verbatimTextOutput("summary")
+             
+      )
+    ),
     
-  
-  
+    fluidRow(
+      column(6,
+             plotOutput("hist"),
+             sliderInput("integer", "Integer:",
+                         min=1, max=100, value=30)
+      ),
+      column(4,
+             plotOutput("boxjitter2")
+      ),
+      column(2,
+             plotOutput("boxjitter3")
+      )
+    ),
+    
+    fluidRow(
+      column(8,
+             plotOutput("barchart2")
+             
+      ),
+      column(4,
+             verbatimTextOutput("summary2")
+      )
+    ),
+    
+    
+    DT::dataTableOutput("Charts")
+    
+  )
+)
+
+
+
+
 

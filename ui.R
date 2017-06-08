@@ -1,8 +1,6 @@
 library(shiny)
 library(collapsibleTree)
 library(ggplot2)
-library(plotly)
-library(shinyBS)
 
 navbarPage(
   title = 'WGA Analysis Tool',
@@ -58,7 +56,6 @@ navbarPage(
       
       
       #Table shows the raw data after filters are applies
-      DT::dataTableOutput('ImportedDataFiltered2'),
       DT::dataTableOutput('ImportedDataFiltered'),
       
       
@@ -135,11 +132,22 @@ navbarPage(
     ),
     
     #Scatter plot of selected x and y variables
-    mainPanel(plotOutput('plot1'),
+    mainPanel(
+      
+      fluidRow(
+        column(6,
+               plotOutput('plot1')
+               
+        ),
+        column(6,
+               plotOutput('sil')
+        )
+      ),
+      
+    
               
-              plotOutput('sil'),
-              verbatimTextOutput("sill"),
               
+
               # this is not yet implemented, want it to display data created with kmeansvariables input mentioned above 
               DT::dataTableOutput("MergedData2"))
   ),
@@ -150,18 +158,12 @@ navbarPage(
     'Charts',
     
     # select variable to display in charts
-    
-    fluidRow(
-      column(6,
-             uiOutput("chartvariable")
+   
+             uiOutput("chartvariable"),
              
-      ),
+     
       
-      column(6,
-             verbatimTextOutput("summary")
-             
-      )
-    ),
+     
     
     fluidRow(
       column(6,
@@ -185,6 +187,7 @@ navbarPage(
              
       ),
       column(4,
+             verbatimTextOutput("summary"),
              verbatimTextOutput("summary2")
       )
     ),

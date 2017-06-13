@@ -8,11 +8,31 @@ navbarPage(
   tabPanel(
     'Explore WGA Structure',
     
-    sidebarPanel(width=3
+    sidebarPanel(width=3,
+                 'Instructions',
+                 HTML("<br><br>"),
+                 'Use the "create items" tab to filter WGA data, create aggregates and join with working data on Local Authorities',
+                 HTML("<br><br>"),
+                 'Use the "create metric" tab to peform calculations on working data variables',
+                 HTML("<br><br>"),
+                 'Use the "K-means" tab to run K-means cluster analysis on selected variables',
+                 HTML("<br><br>"),
+                 'Use the "Charts" tab to view summary statistics and charts of selected variables'
+                 
     ),
     
     mainPanel(
     
+      'Explore WGA Structure',
+      
+      #collapsibleTree is a visual representation of the data dimensions, does not control anything but to aid exploration
+      
+      collapsibleTree(
+        WGA,
+        hierarchy = c("Level1", "Level2", "Level3","Level4","Level5"),
+        width = 1200,
+        height=700),
+      HTML("<br><br>")
    
     )
   ),
@@ -122,7 +142,6 @@ navbarPage(
                  uiOutput('clusters'),
                  sliderInput("range", "Set min/max",
                              min = 2, max = 25, value = c(2,25)),
-                 verbatimTextOutput("rangeno"),
                  # not yet implemented, multi choice list for creating dataset with more than 2 variables for kmeans
                  uiOutput("kmeansvariables"),
                  uiOutput("kmeansLAtype"),
@@ -134,15 +153,8 @@ navbarPage(
     #Scatter plot of selected x and y variables
     mainPanel(
       
-      fluidRow(
-        column(6,
-               plotOutput('plot1')
-               
-        ),
-        column(6,
-               plotOutput('sil')
-        )
-      ),
+      
+               plotOutput('plot1'),
       
     
               

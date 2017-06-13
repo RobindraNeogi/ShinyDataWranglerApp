@@ -442,7 +442,7 @@ shinyServer(function(input, output, session) {
   
   output$xcol <- renderUI({
     
-    choicexcol <- names(MergedContextualDataWithSubset$df)[-(1:4)]
+    choicexcol <- names(MergedContextualDataWithSubset$df)[-(1:6)]
     selectInput("xcol", "Metric part 1", choices = choicexcol)
   })
   
@@ -457,7 +457,7 @@ shinyServer(function(input, output, session) {
   
   output$ycol <- renderUI({
     
-    choiceycol <- names(MergedContextualDataWithSubset$df)[-(1:4)]
+    choiceycol <- names(MergedContextualDataWithSubset$df)[-(1:6)]
     selectInput("ycol", "Metric part 2", choices = choiceycol)
     
   })
